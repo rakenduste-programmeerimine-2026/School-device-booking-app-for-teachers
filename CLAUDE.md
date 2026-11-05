@@ -10,11 +10,11 @@
 ## DECISIONS
 1. App name: Seadmebroneering (placeholder, replace before the pilot)
 2. Sign-in method and who may get an account: Google sign-in. Teachers and admins get accounts. Access is by an admin-managed allow-list of emails; anyone else who signs in with Google is refused.
-3. Time model: free start/end times (no fixed lesson periods, for now)
-4. Device list with total quantities (mock, replace before the pilot): Sülearvuti 30, Tahvelarvuti 20, 3D-printer 1, Cricut 1
-5. School year dates and break periods (approximate, replace before the pilot): 2026-09-01 to 2027-06-05. Breaks: 2026-10-26 to 2026-11-01, 2026-12-23 to 2027-01-02, 2027-03-22 to 2027-03-28.
+3. Time model: lesson periods plus free times. A teacher picks a lesson and its start and end times fill in, or enters free start/end times. Admins set the lesson times.
+4. Device list (quantities are mock until the school's inventory check, replace before the pilot): Sülearvuti 30, Tahvelarvuti 20, LEGO WeDo 2.0, LEGO SPIKE, Ozobot, DJI Tello EDU, 3D-printer 1, Cricut 1. Admins add, rename and archive devices and change quantities.
+5. School year dates and non-teaching periods are admin-editable data, changed every year. A period is a break, a public holiday or a day off. Seed values (approximate, replace before the pilot): 2026-09-01 to 2027-06-05. Breaks: 2026-10-26 to 2026-11-01, 2026-12-23 to 2027-01-02, 2027-03-22 to 2027-03-28.
 6. Who may edit other teachers' bookings: nobody except admins. Teachers edit only their own bookings; admins edit all.
-7. May past bookings be changed by series edits: No. Series edits change only future bookings; past bookings stay as history.
+7. May past bookings be changed by series edits: No. Series edits change only future bookings; past bookings stay as history. As an exception, admins may correct a past booking, and the change is kept in the change history.
 8. Milestone deadlines: M0 Foundation 2026-11-08, M1 Quantity booking 2026-11-11, M2 Recurring series 2026-11-14, M3 Bulk edit 2026-11-16, M4 Pilot and release 2026-11-18. The whole project deadline is 2026-11-18.
 9. Where Supabase runs and who owns Vercel: Supabase runs locally from the Supabase CLI (`supabase start`), with no hosted project. Vercel: Tanel Metshein (w1ttyrat).
 10. Is the repo public or private, and is it in an organization: public, in the organization rakenduste-programmeerimine-2026.
@@ -49,7 +49,9 @@
 
 ## Booking rules
 These are the hard part. Follow them exactly.
-- Tables: `profiles`, `device_types` (`total_quantity`), `booking_series`, `bookings` (`series_id`, `device_type_id`, `quantity`, `starts_at`, `ends_at`).
+- Tables: `profiles`, `device_types` (`total_quantity`, `archived_at`), `booking_series`, `bookings` (`series_id`, `device_type_id`, `quantity`, `starts_at`, `ends_at`), `school_years`, `non_teaching_periods`, `lesson_periods`, `booking_changes`.
+- A lesson only fills in the start and end times. `bookings` stores plain times either way.
+- Archived device types cannot be booked, and their old bookings stay.
 - Every booking belongs to a series, and a single booking is a series of one. This keeps single and bulk edits on one code path.
 - A single-object device (3D printer, Cricut) is a device with `total_quantity = 1`. The UI hides the quantity field for it.
 - Ranges are half-open, so back-to-back lessons do not conflict.
@@ -58,17 +60,22 @@ These are the hard part. Follow them exactly.
 - All writes go through these functions: `SECURITY DEFINER`, `set search_path = ''`, checking `auth.uid()` and permissions inside, with execute revoked from `public` and `anon`.
 - A preview function returns per-date availability and conflicts. The commit function re-checks everything and writes all dates or none, because availability can change between preview and commit.
 - Generate series dates from local wall-clock time in `Europe/Tallinn`. NEVER add 7 × 24 hours, because the school year crosses a daylight-saving change.
-- Exclude break periods from generated dates.
-- RLS: signed-in users can read device types and bookings. Clients have no direct write access to bookings. Only admins write device types.
+- Exclude breaks, public holidays and days off from generated dates, unless the teacher explicitly keeps those dates. A single booking may fall in a non-teaching period.
+- Every booking write is recorded in `booking_changes` inside the write function. These rows survive deleting the booking or series.
+- RLS: signed-in users can read device types, bookings, school years, non-teaching periods, lesson periods and booker names, but not other users' emails or roles. Clients have no direct write access to bookings or `booking_changes`. Only admins write device types, school years, non-teaching periods and lesson periods, and only admins read `booking_changes`.
 - Live availability: subscribe to Postgres Changes on `bookings`, and call `router.refresh()` on any event. Payload contents are not trusted.
 
-## Features (only these three)
+## Features (only these five)
 1. Choose a device type and exact quantity, see live availability (for example 12 of 30 free), and double booking is impossible.
 2. Create a full-year recurring booking with several weekdays and times at once. When a date lacks capacity, show the conflicts and let the teacher change the quantity, skip the date or pick another time.
-3. Change or delete one booking, a whole series, all future bookings, or selected dates in one action.
+3. Change or delete one booking, this and all following bookings, a whole series, or selected dates in one action.
+4. Admins manage devices, the email allow-list, the school year, non-teaching periods and lesson times.
+5. A bookings overview shows who booked what and when, with non-teaching periods marked, and admins can see who changed a booking and when.
 
 ## Phase 2: One issue per session
-Starts only when a team member says "Start issue #N". First confirm that issue's acceptance criteria. Create the branch, implement, test, push, open a PR with `Closes #N` and evidence of test results, move the card to In Review, then stop.
+Starts only when a team member says "Start issue #N". First confirm that issue's acceptance criteria. Create the branch, implement, test, update the docs, push, open a PR with `Closes #N` and evidence of test results, move the card to In Review, then stop.
+
+Update the docs in the same PR: keep README.md matching what the issue changed, so teammates and the pilot contact person can rely on it. If nothing documented changed, say so in the PR.
 
 Before starting any issue, confirm CLAUDE.md exists on main and read it. If it is missing, stop and ask. CLAUDE.md is the source of truth for all later sessions.
 
@@ -81,7 +88,7 @@ Keep tests few and aimed at real risk.
 ## Acceptance criteria for the MVP
 - [ ] Two simultaneous requests can never exceed `total_quantity`, shown by a test.
 - [ ] A failed series commit writes no rows.
-- [ ] All three features work on the deployed Vercel preview.
+- [ ] All five features work on the deployed Vercel preview.
 - [ ] Lint, typecheck and all tests pass in CI.
 - [ ] The contact person completes a full-year booking in about two minutes or less.
 
