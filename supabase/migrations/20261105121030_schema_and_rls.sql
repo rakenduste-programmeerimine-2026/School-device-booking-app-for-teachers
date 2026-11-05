@@ -36,6 +36,10 @@ create table public.bookings (
   constraint bookings_range_half_open check (starts_at < ends_at)
 );
 
+-- The peak-capacity check looks up overlapping bookings per device type.
+create index bookings_device_type_time_idx
+  on public.bookings (device_type_id, starts_at, ends_at);
+
 -- SECURITY DEFINER so policies on profiles can call it without recursing into
 -- the profiles policy itself.
 create function public.is_admin()
