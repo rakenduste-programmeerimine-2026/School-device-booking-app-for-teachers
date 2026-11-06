@@ -3,9 +3,41 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Database = {
   
-  "public": {
+  "graphql_public": {
           Tables: {
-            "booking_series": {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
+          Tables: {
+            "allowed_emails": {
+                  Row: {
+                    "email": string,"role": Database["public"]['Enums']["user_role"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "email": string,"role"?: Database["public"]['Enums']["user_role"]
+                  }
+                  Update: {
+                    "email"?: string,"role"?: Database["public"]['Enums']["user_role"]
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"booking_series": {
                   Row: {
                     "created_at": string,"id": number,"owner_id": string
                   }
@@ -204,7 +236,11 @@ export type CompositeTypes<
   : never
 
 export const Constants = {
-  "public": {
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
           Enums: {
             "user_role": ["teacher", "admin"]
           }
