@@ -1,5 +1,5 @@
 begin;
-select plan(7);
+select plan(10);
 
 insert into public.allowed_emails (email, role)
   values ('teacher@example.com', 'teacher'), ('other@example.com', 'teacher'), ('boss@example.com', 'admin');
@@ -32,6 +32,18 @@ select throws_ok(
 select throws_ok(
   $$ update public.profile_names set full_name = 'Muudetud' $$,
   '42501', null, 'teacher cannot change names through the view');
+select throws_ok(
+  $$ insert into public.profile_names (id, full_name) values (gen_random_uuid(), 'Uus') $$,
+  '42501', null, 'teacher cannot add names through the view');
+select throws_ok(
+  $$ delete from public.profile_names $$,
+  '42501', null, 'teacher cannot delete names through the view');
+
+-- Admin
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}';
+select is(
+  (select full_name from public.profile_names where id = '00000000-0000-0000-0000-00000000000c'),
+  'Jaan Tamm', 'admin reads names too');
 
 -- Signed out
 reset role;
