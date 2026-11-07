@@ -97,6 +97,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"lesson_periods": {
+                  Row: {
+                    "ends_at": string,"id": number,"lesson_number": number,"starts_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ends_at": string,"id"?: never,"lesson_number": number,"starts_at": string
+                  }
+                  Update: {
+                    "ends_at"?: string,"id"?: never,"lesson_number"?: number,"starts_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"non_teaching_periods": {
                   Row: {
                     "ends_on": string,"id": number,"kind": Database["public"]['Enums']["non_teaching_kind"],"name": string,"school_year_id": number,"starts_on": string
