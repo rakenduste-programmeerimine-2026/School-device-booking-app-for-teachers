@@ -6,6 +6,8 @@ insert into public.allowed_emails (email, role)
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'teacher@example.com'),
   ('00000000-0000-0000-0000-00000000000b', 'boss@example.com');
+-- Start from no school years so seed.sql cannot clash with or inflate the counts below.
+delete from public.school_years;
 insert into public.school_years (starts_on, ends_on) values ('2026-09-01', '2027-06-05');
 insert into public.non_teaching_periods (school_year_id, kind, name, starts_on, ends_on)
   select id, 'break', 'Jõuluvaheaeg', '2026-12-23', '2027-01-02' from public.school_years;
