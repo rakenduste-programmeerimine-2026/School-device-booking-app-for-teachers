@@ -19,6 +19,16 @@
 - Tunni valimine täidab ainult broneeringu algus- ja lõpuaja. Broneering salvestab alati tavalise algus- ja lõpuaja, nii et vabalt valitud ajad toimivad samamoodi.
 - Kõik sisseloginud kasutajad saavad tunde lugeda, muuta saab ainult admin.
 
+### Ligipääs ja lubatud e-postid
+- `allowed_emails`: ainult siin olevate e-postidega saab sisse logida.
+- E-posti eemaldamisel blokeeritakse kasutaja ja tema sessioonid lõpetatakse. Ta ei saa uuesti sisse logida ega sessiooni pikendada.
+- **Ooteaeg kuni 1 tund:** juba väljastatud pääsutõend kehtib kuni aegumiseni (`jwt_expiry`, 1 tund). Selle aja jooksul saab eemaldatud kasutaja veel andmeid lugeda ja kirjutavaid funktsioone kutsuda; eemaldatud admin ka seadmeid muuta. Kirjutavad funktsioonid (#8 ja edasi) kontrollivad seepärast ka lubatud e-postide nimekirja.
+- E-posti uuesti lisamisel saab kasutaja jälle sisse logida. Muul põhjusel (näiteks käsitsi) pandud blokeeringut see ei tühista.
+- Rolli muutmine (sama e-post) kasutajat välja ei logi.
+- E-posti muutmisel blokeeritakse vana aadress ja uus saab ligipääsu. Uue aadressiga sisse logides tekib **uus konto**: vanad broneeringud jäävad vana, blokeeritud konto juurde.
+- Viimast admini ei saa nimekirjast eemaldada ega õpetajaks muuta, muidu ei pääseks keegi adminitöövahenditesse.
+- Kasutajat, tema profiili, broneeringuid ega ajalugu ei kustutata.
+
 ### Kasutajate nimed
 - `profiles`: õpetaja näeb ainult enda profiili (e-post, roll), admin näeb kõiki.
 - `profile_names`: vaade, kust iga sisseloginud kasutaja saab lugeda kõigi kasutajate nimesid (`id`, `full_name`), et näha, kes broneeris. Teiste e-post ja roll jäävad varjatuks. Sisselogimata kasutaja nimesid ei näe.
