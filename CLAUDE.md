@@ -61,7 +61,7 @@ These are the hard part. Follow them exactly.
 - A preview function returns per-date availability and conflicts. The commit function re-checks everything and writes all dates or none, because availability can change between preview and commit.
 - Generate series dates from local wall-clock time in `Europe/Tallinn`. NEVER add 7 × 24 hours, because the school year crosses a daylight-saving change.
 - Exclude breaks, public holidays and days off from generated dates, unless the teacher explicitly keeps those dates. A single booking may fall in a non-teaching period.
-- Every booking write is recorded in `booking_changes` inside the write function. These rows survive deleting the booking or series.
+- Every booking write is recorded in `booking_changes` by the trigger on `bookings`, in the write's transaction. Write functions MUST NOT insert into `booking_changes` themselves, or history gets duplicate rows. These rows survive deleting the booking or series.
 - RLS: signed-in users can read device types, bookings, school years, non-teaching periods, lesson periods and booker names, but not other users' emails or roles. Clients have no direct write access to bookings or `booking_changes`. Only admins write device types, school years, non-teaching periods and lesson periods, and only admins read `booking_changes`.
 - Live availability: subscribe to Postgres Changes on `bookings`, and call `router.refresh()` on any event. Payload contents are not trusted.
 
