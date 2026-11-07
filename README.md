@@ -22,6 +22,8 @@
 ### Broneeringute muutuste ajalugu
 - `booking_changes`: iga broneeringu loomine, muutmine ja kustutamine salvestub automaatselt (päästik tabelil `bookings`): kes (`changed_by`), millal (`changed_at`), toiming (`created`, `updated`, `deleted`) ning andmed enne ja pärast (`old_data`, `new_data`).
 - Ajalugu säilib ka pärast broneeringu või terve sarja kustutamist.
+- Muudatus, mis ei muuda ühtegi välja, ajalukku ei lähe.
+- `changed_at` on tehingu algusaeg, nii et ühe hulgimuudatuse kõigil ridadel on sama aeg. Järjesta ajalugu `changed_at` ja seejärel `id` järgi.
 - Ajalugu saab lugeda ainult admin. Keegi ei saa seda rakendusest lisada, muuta ega kustutada.
 
 ### Näidisandmed

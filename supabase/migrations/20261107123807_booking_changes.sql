@@ -36,6 +36,9 @@ create policy "Admins read booking changes"
 -- A trigger rather than an insert in each write function, so #8, #15 and #18 cannot
 -- forget it and bulk edits are covered row by row. It runs in the write's transaction,
 -- so a rolled-back write leaves no history. It fires for cascade deletes from a series too.
+-- Not SECURITY DEFINER on purpose: it runs as the writer. Booking writes come from the
+-- SECURITY DEFINER functions, so this works; a write as a client role fails closed. Do not
+-- "fix" that by granting INSERT on booking_changes to clients.
 create function public.record_booking_change()
 returns trigger
 language plpgsql
@@ -44,6 +47,11 @@ as $$
 declare
   changed_row public.bookings := coalesce(new, old);
 begin
+  -- Bulk edits may touch rows without changing them; those are not history.
+  if tg_op = 'UPDATE' and old is not distinct from new then
+    return null;
+  end if;
+
   insert into public.booking_changes (booking_id, series_id, changed_by, action, old_data, new_data)
   values (
     changed_row.id,
