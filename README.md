@@ -19,6 +19,10 @@
 - Tunni valimine täidab ainult broneeringu algus- ja lõpuaja. Broneering salvestab alati tavalise algus- ja lõpuaja, nii et vabalt valitud ajad toimivad samamoodi.
 - Kõik sisseloginud kasutajad saavad tunde lugeda, muuta saab ainult admin.
 
+### Kasutajate nimed
+- `profiles`: õpetaja näeb ainult enda profiili (e-post, roll), admin näeb kõiki.
+- `profile_names`: vaade, kust iga sisseloginud kasutaja saab lugeda kõigi kasutajate nimesid (`id`, `full_name`), et näha, kes broneeris. Teiste e-post ja roll jäävad varjatuks. Sisselogimata kasutaja nimesid ei näe.
+
 ### Broneeringute muutuste ajalugu
 - `booking_changes`: iga broneeringu loomine, muutmine ja kustutamine salvestub automaatselt (päästik tabelil `bookings`): kes (`changed_by`), millal (`changed_at`), toiming (`created`, `updated`, `deleted`) ning andmed enne ja pärast (`old_data`, `new_data`).
 - Ajalugu säilib ka pärast broneeringu või terve sarja kustutamist.

@@ -53,6 +53,12 @@ export type Database = {
       foreignKeyName: "booking_changes_changed_by_fkey"
       columns: ["changed_by"]
 isOneToOne: false
+      referencedRelation: "profile_names"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "booking_changes_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
@@ -70,6 +76,12 @@ isOneToOne: false
                   }
                   Relationships: [
                     {
+      foreignKeyName: "booking_series_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profile_names"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "booking_series_owner_id_fkey"
       columns: ["owner_id"]
 isOneToOne: false
@@ -182,7 +194,21 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "profile_names": {
+                  Row: {
+                    "full_name": string | null,"id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "full_name"?: string | null,"id"?: string | null
+                         }
+                        Update: {
+                           "full_name"?: string | null,"id"?: string | null
+                         }
+                        Relationships: [
+                    
+                  ]
+                }
           }
           Functions: {
             "is_admin":
