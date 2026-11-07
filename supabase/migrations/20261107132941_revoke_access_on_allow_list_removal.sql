@@ -11,6 +11,14 @@ security definer
 set search_path = ''
 as $$
 begin
+  -- Removing, renaming away or demoting the last admin would lock everyone out of the
+  -- admin tools, and only direct SQL could undo it. The trigger runs after the change,
+  -- so the table already shows the result; raising rolls the change back.
+  if tg_op in ('DELETE', 'UPDATE') and old.role = 'admin'
+     and not exists (select 1 from public.allowed_emails where role = 'admin') then
+    raise exception 'last_admin';
+  end if;
+
   -- A role change keeps the same email; it must not log the user out.
   if tg_op = 'UPDATE' and old.email = new.email then
     return null;
@@ -28,9 +36,10 @@ begin
   end if;
 
   if tg_op in ('INSERT', 'UPDATE') then
+    -- Lift only the ~100-year bans set above, not a ban someone set for another reason.
     update auth.users
       set banned_until = null
-      where lower(email) = new.email;
+      where lower(email) = new.email and banned_until > now() + interval '99 years';
   end if;
 
   return null;

@@ -1,6 +1,8 @@
 begin;
-select plan(12);
+select plan(18);
 
+-- An admin, so the last-admin guard does not get in the way until it is tested at the end.
+insert into public.allowed_emails (email, role) values ('boss@example.com', 'admin');
 -- Teacher with a mixed-case email, an open session with a refresh token, and a booking.
 insert into public.allowed_emails (email, role) values ('teacher@example.com', 'teacher');
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-00000000000a', 'Teacher@Example.com');
@@ -64,6 +66,37 @@ select ok(
 select is(
   (select banned_until from auth.users where id = '00000000-0000-0000-0000-00000000000c'), null,
   'renaming the email unbans the new address');
+
+-- Edge cases
+insert into public.allowed_emails (email) values ('never@example.com');
+select lives_ok(
+  $$ delete from public.allowed_emails where email = 'never@example.com' $$,
+  'removing someone who never signed in works');
+select throws_ok(
+  $$ insert into auth.users (id, email) values ('00000000-0000-0000-0000-00000000000d', 'NEW@example.com') $$,
+  '23505', null, 'a second account whose email differs only by case cannot be created');
+
+-- A ban set for another reason is not lifted by re-adding the email
+insert into public.allowed_emails (email) values ('manual@example.com');
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-00000000000e', 'manual@example.com');
+delete from public.allowed_emails where email = 'manual@example.com';
+update auth.users set banned_until = now() + interval '1 day'
+  where id = '00000000-0000-0000-0000-00000000000e';
+insert into public.allowed_emails (email) values ('manual@example.com');
+select ok(
+  (select banned_until is not null from auth.users where id = '00000000-0000-0000-0000-00000000000e'),
+  're-adding does not lift a ban set for another reason');
+
+-- The last admin cannot be removed, demoted or lost
+select throws_ok(
+  $$ delete from public.allowed_emails where email = 'boss@example.com' $$,
+  'P0001', 'last_admin', 'the last admin cannot be removed');
+select throws_ok(
+  $$ update public.allowed_emails set role = 'teacher' where email = 'boss@example.com' $$,
+  'P0001', 'last_admin', 'the last admin cannot be demoted');
+select lives_ok(
+  $$ update public.allowed_emails set email = 'boss2@example.com' where email = 'boss@example.com' $$,
+  'renaming the last admin keeps an admin, so it is allowed');
 
 -- Clients cannot run the function directly
 set local role authenticated;
