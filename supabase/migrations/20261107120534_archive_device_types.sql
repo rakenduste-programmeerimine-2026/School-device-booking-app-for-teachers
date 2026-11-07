@@ -15,7 +15,8 @@ language plpgsql
 set search_path = ''
 as $$
 begin
-  -- Edits to existing bookings of an archived device (e.g. an admin correcting a time) stay allowed.
+  -- Any edit that keeps the same device stays allowed, so existing bookings of an archived
+  -- device can still be corrected. Who may make which edit is checked in the #8+ functions.
   if tg_op = 'UPDATE' and new.device_type_id = old.device_type_id then
     return new;
   end if;

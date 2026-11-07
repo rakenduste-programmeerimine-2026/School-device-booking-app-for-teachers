@@ -17,8 +17,10 @@ insert into public.bookings (series_id, device_type_id, quantity, starts_at, end
 -- Admin archives, teacher cannot
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}';
-select lives_ok(
-  $$ update public.device_types set archived_at = now() where name = 'Test camera' $$,
+-- An update blocked by RLS changes 0 rows without an error, so check the result directly.
+update public.device_types set archived_at = now() where name = 'Test camera';
+select isnt(
+  (select archived_at from public.device_types where name = 'Test camera'), null,
   'admin archives a device');
 
 set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}';
