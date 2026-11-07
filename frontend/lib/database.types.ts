@@ -85,14 +85,14 @@ isOneToOne: false
                   ]
                 },"device_types": {
                   Row: {
-                    "id": number,"name": string,"total_quantity": number
+                    "archived_at": string | null,"id": number,"name": string,"total_quantity": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: never,"name": string,"total_quantity": number
+                    "archived_at"?: string | null,"id"?: never,"name": string,"total_quantity": number
                   }
                   Update: {
-                    "id"?: never,"name"?: string,"total_quantity"?: number
+                    "archived_at"?: string | null,"id"?: never,"name"?: string,"total_quantity"?: number
                   }
                   Relationships: [
                     
