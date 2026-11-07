@@ -97,6 +97,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"non_teaching_periods": {
+                  Row: {
+                    "ends_on": string,"id": number,"kind": Database["public"]['Enums']["non_teaching_kind"],"name": string,"school_year_id": number,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ends_on": string,"id"?: never,"kind": Database["public"]['Enums']["non_teaching_kind"],"name": string,"school_year_id": number,"starts_on": string
+                  }
+                  Update: {
+                    "ends_on"?: string,"id"?: never,"kind"?: Database["public"]['Enums']["non_teaching_kind"],"name"?: string,"school_year_id"?: number,"starts_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "non_teaching_periods_school_year_id_fkey"
+      columns: ["school_year_id"]
+isOneToOne: false
+      referencedRelation: "school_years"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "email": string,"full_name": string | null,"id": string,"role": Database["public"]['Enums']["user_role"]
@@ -107,6 +127,20 @@ isOneToOne: false
                   }
                   Update: {
                     "email"?: string,"full_name"?: string | null,"id"?: string,"role"?: Database["public"]['Enums']["user_role"]
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"school_years": {
+                  Row: {
+                    "ends_on": string,"id": number,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ends_on": string,"id"?: never,"starts_on": string
+                  }
+                  Update: {
+                    "ends_on"?: string,"id"?: never,"starts_on"?: string
                   }
                   Relationships: [
                     
@@ -122,7 +156,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "user_role": "teacher"|"admin"
+            "non_teaching_kind": "break"|"public_holiday"|"day_off","user_role": "teacher"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -242,7 +276,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "user_role": ["teacher", "admin"]
+            "non_teaching_kind": ["break", "public_holiday", "day_off"],"user_role": ["teacher", "admin"]
           }
         }
 } as const
