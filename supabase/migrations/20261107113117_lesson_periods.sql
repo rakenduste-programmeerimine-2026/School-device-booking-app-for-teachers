@@ -6,9 +6,9 @@
 create table public.lesson_periods (
   id bigint generated always as identity primary key,
   lesson_number smallint not null unique check (lesson_number > 0),
-  starts_at time not null,
-  ends_at time not null,
-  constraint lesson_periods_valid_range check (starts_at < ends_at)
+  starts_time time not null,
+  ends_time time not null,
+  constraint lesson_periods_valid_range check (starts_time < ends_time)
 );
 
 revoke all on public.lesson_periods from anon, authenticated;

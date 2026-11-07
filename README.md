@@ -9,6 +9,6 @@
 - Kõik sisseloginud kasutajad saavad neid lugeda, muuta saab ainult admin.
 
 ### Koolitunnid
-- `lesson_periods`: tunni number (`lesson_number`, unikaalne) ning algus- ja lõpuaeg (`starts_at`, `ends_at`) Tallinna kellaajana, näiteks 1. tund 08:15–09:00.
+- `lesson_periods`: tunni number (`lesson_number`, unikaalne) ning algus- ja lõpuaeg (`starts_time`, `ends_time`) Tallinna kellaajana, näiteks 1. tund 08:15–09:00.
 - Tunni valimine täidab ainult broneeringu algus- ja lõpuaja. Broneering salvestab alati tavalise algus- ja lõpuaja, nii et vabalt valitud ajad toimivad samamoodi.
 - Kõik sisseloginud kasutajad saavad tunde lugeda, muuta saab ainult admin.

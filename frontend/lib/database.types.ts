@@ -99,14 +99,14 @@ isOneToOne: false
                   ]
                 },"lesson_periods": {
                   Row: {
-                    "ends_at": string,"id": number,"lesson_number": number,"starts_at": string
+                    "ends_time": string,"id": number,"lesson_number": number,"starts_time": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ends_at": string,"id"?: never,"lesson_number": number,"starts_at": string
+                    "ends_time": string,"id"?: never,"lesson_number": number,"starts_time": string
                   }
                   Update: {
-                    "ends_at"?: string,"id"?: never,"lesson_number"?: number,"starts_at"?: string
+                    "ends_time"?: string,"id"?: never,"lesson_number"?: number,"starts_time"?: string
                   }
                   Relationships: [
                     
