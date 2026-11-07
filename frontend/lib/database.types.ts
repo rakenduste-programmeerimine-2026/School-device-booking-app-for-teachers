@@ -37,6 +37,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"booking_changes": {
+                  Row: {
+                    "action": Database["public"]['Enums']["booking_change_action"],"booking_id": number,"changed_at": string,"changed_by": string | null,"id": number,"new_data": Json | null,"old_data": Json | null,"series_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": Database["public"]['Enums']["booking_change_action"],"booking_id": number,"changed_at"?: string,"changed_by"?: string | null,"id"?: never,"new_data"?: Json | null,"old_data"?: Json | null,"series_id": number
+                  }
+                  Update: {
+                    "action"?: Database["public"]['Enums']["booking_change_action"],"booking_id"?: number,"changed_at"?: string,"changed_by"?: string | null,"id"?: never,"new_data"?: Json | null,"old_data"?: Json | null,"series_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_changes_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"booking_series": {
                   Row: {
                     "created_at": string,"id": number,"owner_id": string
@@ -170,7 +190,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "non_teaching_kind": "break"|"public_holiday"|"day_off","user_role": "teacher"|"admin"
+            "booking_change_action": "created"|"updated"|"deleted","non_teaching_kind": "break"|"public_holiday"|"day_off","user_role": "teacher"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -290,7 +310,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "non_teaching_kind": ["break", "public_holiday", "day_off"],"user_role": ["teacher", "admin"]
+            "booking_change_action": ["created", "updated", "deleted"],"non_teaching_kind": ["break", "public_holiday", "day_off"],"user_role": ["teacher", "admin"]
           }
         }
 } as const

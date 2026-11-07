@@ -19,6 +19,13 @@
 - Tunni valimine täidab ainult broneeringu algus- ja lõpuaja. Broneering salvestab alati tavalise algus- ja lõpuaja, nii et vabalt valitud ajad toimivad samamoodi.
 - Kõik sisseloginud kasutajad saavad tunde lugeda, muuta saab ainult admin.
 
+### Broneeringute muutuste ajalugu
+- `booking_changes`: iga broneeringu loomine, muutmine ja kustutamine salvestub automaatselt (päästik tabelil `bookings`): kes (`changed_by`), millal (`changed_at`), toiming (`created`, `updated`, `deleted`) ning andmed enne ja pärast (`old_data`, `new_data`).
+- Ajalugu säilib ka pärast broneeringu või terve sarja kustutamist.
+- Muudatus, mis ei muuda ühtegi välja, ajalukku ei lähe.
+- `changed_at` on tehingu algusaeg, nii et ühe hulgimuudatuse kõigil ridadel on sama aeg. Järjesta ajalugu `changed_at` ja seejärel `id` järgi.
+- Ajalugu saab lugeda ainult admin. Keegi ei saa seda rakendusest lisada, muuta ega kustutada.
+
 ### Näidisandmed
 `supabase db reset` laeb pärast migratsioone faili `supabase/seed.sql`. Kõik väärtused on näidised ja need tuleb enne pilooti asendada kooli päris andmetega.
 - Seadmed: Sülearvuti 30, Tahvelarvuti 20, LEGO WeDo 2.0 12, LEGO SPIKE 12, Ozobot 15, DJI Tello EDU 6, 3D-printer 1, Cricut 1. Kogused muutuvad pärast kooli inventuuri.
