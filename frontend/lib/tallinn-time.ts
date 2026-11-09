@@ -18,6 +18,10 @@ function tallinnOffset(instant: number): number {
 // Turns a Tallinn wall-clock date ("2026-10-26") and time ("08:00") into a UTC ISO string.
 // Offset is looked up twice because the first guess may sit on the other side of a DST change.
 export function tallinnToIso(date: string, time: string): string {
+  // Date.parse is lenient (it reads "nullTnull:00Z" as the year 2000), so check the format first.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}/.test(time)) {
+    throw new RangeError("Invalid date or time");
+  }
   const wallClockAsUtc = Date.parse(`${date}T${time.slice(0, 5)}:00Z`);
   const guess = wallClockAsUtc - tallinnOffset(wallClockAsUtc);
   return new Date(wallClockAsUtc - tallinnOffset(guess)).toISOString();

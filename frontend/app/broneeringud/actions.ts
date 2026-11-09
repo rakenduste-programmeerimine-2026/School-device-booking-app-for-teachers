@@ -19,10 +19,15 @@ export async function createBooking(_prev: BookingState, formData: FormData): Pr
   const { data: claims } = await supabase.auth.getClaims();
   if (!claims) return { error: errorMessages.not_authenticated };
 
-  const date = String(formData.get("date"));
-  const lessonId = String(formData.get("lessonId") ?? "");
-  let start = String(formData.get("startTime"));
-  let end = String(formData.get("endTime"));
+  // A missing field must stay empty: String(null) would be the truthy text "null".
+  const field = (name: string) => {
+    const value = formData.get(name);
+    return typeof value === "string" ? value : "";
+  };
+  const date = field("date");
+  const lessonId = field("lessonId");
+  let start = field("startTime");
+  let end = field("endTime");
 
   // A lesson only fills in the times; the booking itself stores plain timestamps.
   if (lessonId) {
@@ -37,11 +42,20 @@ export async function createBooking(_prev: BookingState, formData: FormData): Pr
   }
   if (!date || !start || !end) return { error: "Vali kuupäev ja ajad." };
 
+  // Malformed input (e.g. "2026-13-45") makes toISOString throw; report it instead of crashing.
+  let startsAt: string, endsAt: string;
+  try {
+    startsAt = tallinnToIso(date, start);
+    endsAt = tallinnToIso(date, end);
+  } catch {
+    return { error: "Vali kuupäev ja ajad." };
+  }
+
   const { error } = await supabase.rpc("create_booking", {
-    p_device_type_id: Number(formData.get("deviceTypeId")),
-    p_quantity: Number(formData.get("quantity") ?? 1),
-    p_starts_at: tallinnToIso(date, start),
-    p_ends_at: tallinnToIso(date, end),
+    p_device_type_id: Number(field("deviceTypeId")),
+    p_quantity: Number(field("quantity") || 1),
+    p_starts_at: startsAt,
+    p_ends_at: endsAt,
   });
   if (!error) return { success: true };
 

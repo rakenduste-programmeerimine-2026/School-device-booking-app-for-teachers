@@ -18,3 +18,8 @@ test("same wall-clock time shifts by an hour across the DST change", () => {
 test("accepts database times with seconds", () => {
   expect(tallinnToIso("2026-12-01", "08:45:00")).toBe("2026-12-01T06:45:00.000Z");
 });
+
+test("throws on an invalid date so the caller can report it", () => {
+  expect(() => tallinnToIso("null", "null")).toThrow(RangeError);
+  expect(() => tallinnToIso("2026-13-45", "08:00")).toThrow(RangeError);
+});
