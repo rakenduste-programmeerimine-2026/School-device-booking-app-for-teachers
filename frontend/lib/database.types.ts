@@ -217,6 +217,11 @@ isOneToOne: false
 "create_booking":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_quantity": number,"p_starts_at": string }; Returns: number
                            },
+"device_availability":
+{ Args: { "p_date": string,"p_ends": string,"p_starts": string }; Returns: {
+                    "free_quantity": number,"id": number,"name": string,"total_quantity": number
+                  }[]
+                           },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },

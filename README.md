@@ -53,8 +53,22 @@
 - `changed_at` on tehingu algusaeg, nii et ühe hulgimuudatuse kõigil ridadel on sama aeg. Järjesta ajalugu `changed_at` ja seejärel `id` järgi.
 - Ajalugu saab lugeda ainult admin. Keegi ei saa seda rakendusest lisada, muuta ega kustutada.
 
+### Seadmete saadavus
+- `device_availability(p_date, p_starts, p_ends)`: tagastab iga arhiveerimata seadme koguarvu ja vaba koguse antud ajavahemikus. Kuupäev ja kellaajad on Tallinna aja järgi, nii et suve- ja talveaja vahetus on arvestatud.
+- Vaba kogus tuleb funktsioonist `available_quantity`, nii et seadmete valik ja `create_booking` arvestavad mahtu ühtemoodi (tipukasutus, poolavatud vahemikud, mitte alla 0).
+- Funktsiooni saavad kutsuda ainult sisseloginud kasutajad.
+
 ### Näidisandmed
 `supabase db reset` laeb pärast migratsioone faili `supabase/seed.sql`. Kõik väärtused on näidised ja need tuleb enne pilooti asendada kooli päris andmetega.
 - Seadmed: Sülearvuti 30, Tahvelarvuti 20, LEGO WeDo 2.0 12, LEGO SPIKE 12, Ozobot 15, DJI Tello EDU 6, 3D-printer 1, Cricut 1. Kogused muutuvad pärast kooli inventuuri.
 - Õppeaasta 2026-09-01 kuni 2027-06-05 ning vaheajad: sügisvaheaeg 2026-10-26 kuni 2026-11-01, jõuluvaheaeg 2026-12-23 kuni 2027-01-02, kevadvaheaeg 2027-03-22 kuni 2027-03-28.
 - Koolitunnid 1–8: 08:15–09:00, 09:10–09:55, 10:05–10:50, 11:00–11:45, 12:15–13:00, 13:10–13:55, 14:05–14:50, 15:00–15:45.
+
+## Rakendus
+
+### Seadme ja koguse valik (avaleht)
+- Õpetaja valib kuupäeva ja koolitunni (algus- ja lõpuaeg täituvad ise) või sisestab algus- ja lõpuaja vabalt.
+- Seadmete valikus on iga seadme juures vaba ja kogu kogus valitud ajal, näiteks "Sülearvuti – 12 / 30 vaba". Arhiveeritud seadmeid valikus ei ole.
+- Üksikobjekti (koguarv 1, näiteks 3D-printer) puhul koguse välja ei näidata.
+- Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
+- Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
