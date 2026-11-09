@@ -34,6 +34,13 @@
 - `profile_names`: vaade, kust iga sisseloginud kasutaja saab lugeda kõigi kasutajate nimesid (`id`, `full_name`), et näha, kes broneeris. Teiste e-post ja roll jäävad varjatuks. Sisselogimata kasutaja nimesid ei näe.
 - Supabase'i linter märgib `profile_names` hoiatusega "security definer view". See on teadlik valik: vaade loeb `profiles` tabelit omaniku õigustega, et näidata ka teiste nimesid, ja sellepärast tohib vaates olla ainult `id` ja `full_name`. Ära "paranda" seda `security_invoker = true` peale, muidu näeb õpetaja jälle ainult enda nime.
 
+### Broneerimine
+- `create_booking(device_type_id, quantity, starts_at, ends_at)` loob ühe broneeringu (ühe broneeringuga sarja) ja tagastab broneeringu id. Kliendid ei kirjuta tabelisse `bookings` otse, vaid ainult selle funktsiooni kaudu.
+- Funktsioon lukustab seadme rea (`FOR UPDATE`), nii et samaaegsed broneeringud samale seadmele ootavad üksteist ega saa kunagi koguarvu ületada.
+- Mahtu kontrollitakse **tipukasutuse** järgi: loeb, mitu seadet on samal ajal kasutusel, mitte kõigi kattuvate broneeringute summa. Järjestikused tunnid (näiteks 09:00–10:00 ja 10:00–11:00) ei konflikteeru.
+- Vead (tagastatakse veateatena): `not_authenticated`, `access_revoked` (e-post pole enam lubatud nimekirjas), `invalid_quantity`, `invalid_range`, `device_type_not_found`, `device_type_archived`, `insufficient_capacity` (detailis `available=N`). Vea korral ei kirjutata ühtegi rida.
+- `available_quantity(device_type_id, starts_at, ends_at)` tagastab vabade seadmete arvu ajavahemikus (näiteks 12 vaba 30-st). See pole kunagi negatiivne.
+
 ### Broneeringute muutuste ajalugu
 - `booking_changes`: iga broneeringu loomine, muutmine ja kustutamine salvestub automaatselt (päästik tabelil `bookings`): kes (`changed_by`), millal (`changed_at`), toiming (`created`, `updated`, `deleted`) ning andmed enne ja pärast (`old_data`, `new_data`).
 - Ajalugu säilib ka pärast broneeringu või terve sarja kustutamist.
