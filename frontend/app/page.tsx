@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { DevicePicker } from "./device-picker";
+import { RefreshOnBookingChange } from "./refresh-on-booking-change";
 
 async function CurrentUser() {
   const supabase = await createClient();
@@ -60,6 +61,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <Suspense>
         <Picker searchParams={searchParams} />
       </Suspense>
+      <RefreshOnBookingChange />
     </main>
   );
 }

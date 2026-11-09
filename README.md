@@ -67,3 +67,5 @@
 - Üksikobjekti (koguarv 1, näiteks 3D-printer) puhul koguse välja ei näidata.
 - Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
+- Vaba kogus uueneb ise: leht tellib Supabase Realtime'i kaudu tabeli `bookings` muudatused (Postgres Changes) ja iga sündmuse peale arvutab server saadavuse uuesti. Kui keegi teine broneerib samal ajal, muutub "X / Y vaba" ilma lehte värskendamata. Sündmuse sisu ei kasutata, numbrid tulevad alati serverist.
+- Selleks on tabel `bookings` lisatud publikatsiooni `supabase_realtime`. Realtime saadab sündmusi ainult sisseloginud kasutajatele, kellel on õigus broneeringuid lugeda.
