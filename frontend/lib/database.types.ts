@@ -211,8 +211,17 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "is_admin":
+            "available_quantity":
+{ Args: { "p_device_type_id": number,"p_ends_at": string,"p_starts_at": string }; Returns: number
+                           },
+"create_booking":
+{ Args: { "p_device_type_id": number,"p_ends_at": string,"p_quantity": number,"p_starts_at": string }; Returns: number
+                           },
+"is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"peak_usage":
+{ Args: { "p_device_type_id": number,"p_ends_at": string,"p_starts_at": string }; Returns: number
                            }
           }
           Enums: {
