@@ -50,9 +50,7 @@
 
 ### Seadmete saadavus
 - `device_availability(p_date, p_starts, p_ends)`: tagastab iga arhiveerimata seadme koguarvu ja vaba koguse antud ajavahemikus. Kuupäev ja kellaajad on Tallinna aja järgi, nii et suve- ja talveaja vahetus on arvestatud.
-- Vaba kogus arvutatakse **tipukasutuse** järgi: kaks broneeringut, mis kattuvad valitud ajaga, aga mitte omavahel, ei liitu. Näiteks 09–10 3 tk ja 10–11 4 tk teeb vahemikus 09–11 hõivatuks 4, mitte 7.
-- Vahemikud on poolavatud: 10:00 lõppev broneering ei sega 10:00 algavat.
-- Vaba kogus ei lähe alla 0, isegi kui admin on koguarvu vähendanud alla juba broneeritu.
+- Vaba kogus tuleb funktsioonist `available_quantity`, nii et seadmete valik ja `create_booking` arvestavad mahtu ühtemoodi (tipukasutus, poolavatud vahemikud, mitte alla 0).
 - Funktsiooni saavad kutsuda ainult sisseloginud kasutajad.
 
 ### Näidisandmed
