@@ -72,3 +72,9 @@
 - Üksikobjekti (koguarv 1, näiteks 3D-printer) puhul koguse välja ei näidata.
 - Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
+
+## Testid
+Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
+- `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
+- `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi ning koguarvu ei ületata kunagi. Skript kirjutab ajutised read ja kustutab need ise.
+- CI käivitab mõlemad igal PR-il.
