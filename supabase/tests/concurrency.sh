@@ -48,9 +48,21 @@ commit;
 SQL
 a_pid=$!
 
+# Wait until A is inside pg_sleep, so it has booked and holds the lock. A fixed sleep could let
+# B win the lock first on a slow runner, which would fail the test for the wrong reason.
+for _ in $(seq 1 50); do
+  a_holds_lock=$(psql_db -c "select count(*) from pg_stat_activity
+    where pid <> pg_backend_pid() and state = 'active' and query like 'select pg_sleep(3)%'")
+  [ "$a_holds_lock" = 1 ] && break
+  sleep 0.2
+done
+if [ "$a_holds_lock" != 1 ]; then
+  echo "FAIL - session A did not take the lock within 10s: $(cat "$a_log")"
+  exit 1
+fi
+
 # Session B asks for one more overlapping device while A is still open. Without the row lock
 # it would not see A's uncommitted booking and would succeed, exceeding the total.
-sleep 1
 b_started=$(date +%s)
 b_output=$(psql_db 2>&1 <<SQL || true
 $claims
