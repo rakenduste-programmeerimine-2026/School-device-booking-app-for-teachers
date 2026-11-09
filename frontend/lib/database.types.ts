@@ -211,6 +211,11 @@ isOneToOne: false
                 }
           }
           Functions: {
+            "device_availability":
+{ Args: { "p_date": string,"p_ends": string,"p_starts": string }; Returns: {
+                    "free_quantity": number,"id": number,"name": string,"total_quantity": number
+                  }[]
+                           }
             "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            }
