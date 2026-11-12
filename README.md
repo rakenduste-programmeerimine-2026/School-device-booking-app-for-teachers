@@ -73,8 +73,14 @@
 - Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
 
+### Sarja kuupäevad
+- `generateSeriesDates` (`frontend/lib/series-dates.ts`) annab õppeaasta kõik valitud nädalapäevade kuupäevad koos algus- ja lõpuajaga (UTC ISO). Kuupäevi käiakse läbi kalendripäevadena ja kellaaeg tehakse Tallinna aja järgi, seega suve- ja talveajale üleminek ei nihuta tunde.
+- Vaheajad, riigipühad ja õppetöövabad päevad (piirid kaasa arvatud) jäetakse välja, välja arvatud kuupäevad, mille õpetaja jätab `keepDates` kaudu sarja alles.
+- Funktsioon ei loe andmebaasi: õppeaasta ja perioodid antakse sisse. See on veel ühegi lehega ühendamata.
+
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
 - `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi ning koguarvu ei ületata kunagi. Skript kirjutab ajutised read ja kustutab need ise.
 - CI käivitab mõlemad igal PR-il.
+- `npm test` kaustas `frontend`: Vitest testid (Tallinna aja teisendus ja sarja kuupäevad, sh suve-/talveajale üleminek ning õppetöövabade päevade vahelejätmine).
