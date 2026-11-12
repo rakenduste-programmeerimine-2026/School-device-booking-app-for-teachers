@@ -26,3 +26,17 @@ export function tallinnToIso(date: string, time: string): string {
   const guess = wallClockAsUtc - tallinnOffset(wallClockAsUtc);
   return new Date(wallClockAsUtc - tallinnOffset(guess)).toISOString();
 }
+
+// The Tallinn calendar date ("2026-11-16") of an instant, so a booking at 23:30 local time
+// lands on its local day, not the UTC one.
+export function tallinnDate(instant: string | number): string {
+  const p = Object.fromEntries(tallinn.formatToParts(new Date(instant)).map((x) => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day}`;
+}
+
+// Plain calendar arithmetic: dates carry no clock time, so UTC math cannot hit a DST change.
+export function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}

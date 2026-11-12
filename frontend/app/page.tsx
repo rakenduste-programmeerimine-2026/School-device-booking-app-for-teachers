@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DevicePicker } from "./device-picker";
 
@@ -56,6 +57,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <Suspense>
         <CurrentUser />
       </Suspense>
+      <Link href="/broneeringud" className="underline">
+        Vaata broneeringuid
+      </Link>
       <h1 className="text-2xl font-semibold">Broneeri seade</h1>
       <Suspense>
         <Picker searchParams={searchParams} />

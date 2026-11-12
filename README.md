@@ -73,6 +73,13 @@
 - Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
 
+### Broneeringute ülevaade (leht `/broneeringud`)
+- Näitab ühe nädala (esmaspäevast pühapäevani) kõigi õpetajate broneeringuid. Iga rea juures on kellaaeg (Tallinna aja järgi), seade, kogus ja broneerija nimi (vaatest `profile_names`, teiste e-posti ega rolli ei näidata).
+- Nädalat vahetatakse linkidega "Eelmine nädal" ja "Järgmine nädal" või aadressiga `/broneeringud?week=2026-11-16` (mistahes kuupäev, näidatakse selle nädalat). Vaikimisi on praegune nädal.
+- Iga päev on nähtav ka siis, kui broneeringuid pole. Õppetöövabad päevad on eraldi värviga märgitud: koolivaheaeg (kollane), riigipüha (punane), õppetöövaba päev (sinine), koos perioodi nimega.
+- Vaade on ainult lugemiseks: muutmise ja kustutamise nuppe pole ning kliendid ei saa tabelisse `bookings` otse kirjutada.
+- Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
+
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
