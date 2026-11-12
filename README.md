@@ -41,6 +41,11 @@
 - Vead (tagastatakse veateatena): `not_authenticated`, `access_revoked` (e-post pole enam lubatud nimekirjas), `invalid_quantity`, `invalid_range`, `device_type_not_found`, `device_type_archived`, `insufficient_capacity` (detailis `available=N`). Vea korral ei kirjutata ühtegi rida.
 - `available_quantity(device_type_id, starts_at, ends_at)` tagastab vabade seadmete arvu ajavahemikus (näiteks 12 vaba 30-st). See pole kunagi negatiivne.
 
+### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
+- Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.
+- Serveritoiming `createBooking` (`frontend/app/broneeringud/actions.ts`) kutsub `create_booking`. Kellaajad tõlgitakse Tallinna kohaliku ajana (`frontend/lib/tallinn-time.ts`), nii et suve- ja talveaeg on õige.
+- Vigade korral näidatakse eestikeelset teadet, nt „Valitud ajal on vabu seadmeid ainult 5.“ Koolivaheajale võib üksikbroneeringu teha.
+
 ### Broneeringute muutuste ajalugu
 - `booking_changes`: iga broneeringu loomine, muutmine ja kustutamine salvestub automaatselt (päästik tabelil `bookings`): kes (`changed_by`), millal (`changed_at`), toiming (`created`, `updated`, `deleted`) ning andmed enne ja pärast (`old_data`, `new_data`).
 - Ajalugu säilib ka pärast broneeringu või terve sarja kustutamist.
@@ -69,3 +74,9 @@
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
 - Vaba kogus uueneb ise: leht tellib Supabase Realtime'i kaudu tabeli `bookings` muudatused (Postgres Changes) ja iga sündmuse peale arvutab server saadavuse uuesti. Kui keegi teine broneerib samal ajal, muutub "X / Y vaba" ilma lehte värskendamata. Sündmuse sisu ei kasutata, numbrid tulevad alati serverist.
 - Selleks on tabel `bookings` lisatud publikatsiooni `supabase_realtime`. Realtime saadab sündmusi ainult sisseloginud kasutajatele, kellel on õigus broneeringuid lugeda.
+
+## Testid
+Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
+- `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
+- `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi ning koguarvu ei ületata kunagi. Skript kirjutab ajutised read ja kustutab need ise.
+- CI käivitab mõlemad igal PR-il.
