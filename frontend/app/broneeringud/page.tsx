@@ -49,7 +49,12 @@ function mondayOf(date: string): string {
 // cache. Do not add "use cache" here.
 async function Week({ searchParams }: Pick<PageProps<"/broneeringud">, "searchParams">) {
   const { week } = await searchParams;
-  const requested = typeof week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(week) ? week : "";
+  // The format check alone lets through impossible dates such as 2026-13-45, which would make
+  // addDays throw, so an unparseable date also falls back to this week.
+  const requested =
+    typeof week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(week) && !Number.isNaN(asDate(week).getTime())
+      ? week
+      : "";
   const monday = mondayOf(requested || todayInTallinn());
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const sunday = days[6];
