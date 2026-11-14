@@ -214,6 +214,12 @@ isOneToOne: false
             "available_quantity":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_starts_at": string }; Returns: number
                            },
+"check_series_dates":
+{ Args: { "p_dates": Json }; Returns: undefined
+                           },
+"commit_series":
+{ Args: { "p_dates": Json,"p_device_type_id": number }; Returns: number
+                           },
 "create_booking":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_quantity": number,"p_starts_at": string }; Returns: number
                            },

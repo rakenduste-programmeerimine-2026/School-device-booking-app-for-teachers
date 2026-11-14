@@ -38,51 +38,72 @@ insert into public.device_types (id, name, total_quantity) overriding system val
   values ($device_id, 'Concurrency test device', $total);
 SQL
 
-# Session A books every device and keeps its transaction open for 3 seconds.
-psql_db -v ON_ERROR_STOP=1 > "$a_log" 2>&1 <<SQL &
-begin;
-$claims
-select public.create_booking($device_id, $total, '2030-01-07 09:00+02', '2030-01-07 10:00+02');
-select pg_sleep(3);
-commit;
-SQL
-a_pid=$!
-
-# Wait until A is inside pg_sleep, so it has booked and holds the lock. A fixed sleep could let
-# B win the lock first on a slow runner, which would fail the test for the wrong reason.
-for _ in $(seq 1 50); do
-  a_holds_lock=$(psql_db -c "select count(*) from pg_stat_activity
-    where pid <> pg_backend_pid() and state = 'active' and query like 'select pg_sleep(3)%'")
-  [ "$a_holds_lock" = 1 ] && break
-  sleep 0.2
-done
-if [ "$a_holds_lock" != 1 ]; then
-  echo "FAIL - session A did not take the lock within 10s: $(cat "$a_log")"
-  exit 1
-fi
-
-# Session B asks for one more overlapping device while A is still open. Without the row lock
-# it would not see A's uncommitted booking and would succeed, exceeding the total.
-b_started=$(date +%s)
-b_output=$(psql_db 2>&1 <<SQL || true
-$claims
-select public.create_booking($device_id, 1, '2030-01-07 09:30+02', '2030-01-07 10:30+02');
-SQL
-)
-b_waited=$(( $(date +%s) - b_started ))
-
-a_status=0
-wait "$a_pid" || a_status=$?
-booked=$(psql_db -c "select coalesce(sum(quantity), 0) from public.bookings where device_type_id = $device_id")
-
 failed=0
 check() {
   if [ "$1" = ok ]; then echo "ok   - $2"; else echo "FAIL - $2"; failed=1; fi
 }
-[ "$a_status" -eq 0 ] && check ok "session A booked all $total devices" || check fail "session A booked all $total devices: $(cat "$a_log")"
-grep -q insufficient_capacity <<<"$b_output" && check ok "session B was refused (waited ${b_waited}s for A)" \
-  || check fail "session B was refused: $b_output"
-[ "$booked" -le "$total" ] && check ok "booked $booked of $total, the total was not exceeded" \
-  || check fail "booked $booked of $total, the total was exceeded"
+
+# One round: session A books every device on $1 and keeps its transaction open for 3 seconds,
+# then session B runs $3 for an overlapping time. $2 names B's request in the output.
+run_round() {
+  local day=$1 b_label=$2 b_sql=$3
+  psql_db -v ON_ERROR_STOP=1 > "$a_log" 2>&1 <<SQL &
+begin;
+$claims
+select public.create_booking($device_id, $total, '$day 09:00+02', '$day 10:00+02');
+select pg_sleep(3);
+commit;
+SQL
+  local a_pid=$!
+
+  # Wait until A is inside pg_sleep, so it has booked and holds the lock. A fixed sleep could
+  # let B win the lock first on a slow runner, which would fail the test for the wrong reason.
+  local a_holds_lock=0
+  for _ in $(seq 1 50); do
+    a_holds_lock=$(psql_db -c "select count(*) from pg_stat_activity
+      where pid <> pg_backend_pid() and state = 'active' and query like 'select pg_sleep(3)%'")
+    [ "$a_holds_lock" = 1 ] && break
+    sleep 0.2
+  done
+  if [ "$a_holds_lock" != 1 ]; then
+    echo "FAIL - session A did not take the lock within 10s: $(cat "$a_log")"
+    exit 1
+  fi
+
+  # B asks while A is still open. Without the row lock it would not see A's uncommitted
+  # booking and would succeed, exceeding the total.
+  local b_started b_output b_waited a_status=0 booked
+  b_started=$(date +%s)
+  b_output=$(psql_db 2>&1 <<SQL || true
+$claims
+$b_sql
+SQL
+)
+  b_waited=$(( $(date +%s) - b_started ))
+  wait "$a_pid" || a_status=$?
+  booked=$(psql_db -c "select coalesce(sum(quantity), 0) from public.bookings
+    where device_type_id = $device_id and starts_at < '$day 10:00+02' and ends_at > '$day 09:00+02'")
+
+  [ "$a_status" -eq 0 ] && check ok "$day: session A booked all $total devices" \
+    || check fail "$day: session A booked all $total devices: $(cat "$a_log")"
+  grep -q insufficient_capacity <<<"$b_output" && check ok "$day: $b_label was refused (waited ${b_waited}s for A)" \
+    || check fail "$day: $b_label was refused: $b_output"
+  [ "$booked" -le "$total" ] && check ok "$day: booked $booked of $total, the total was not exceeded" \
+    || check fail "$day: booked $booked of $total, the total was exceeded"
+}
+
+run_round 2030-01-07 "a single booking" \
+  "select public.create_booking($device_id, 1, '2030-01-07 09:30+02', '2030-01-07 10:30+02');"
+
+# The series has a free date first, so a partial write would show up on 2030-01-21.
+run_round 2030-01-14 "a series commit" \
+  "select public.commit_series($device_id, '[
+     {\"starts_at\": \"2030-01-21T09:00:00+02:00\", \"ends_at\": \"2030-01-21T10:00:00+02:00\", \"quantity\": 1},
+     {\"starts_at\": \"2030-01-14T09:30:00+02:00\", \"ends_at\": \"2030-01-14T10:30:00+02:00\", \"quantity\": 1}
+   ]'::jsonb);"
+partial=$(psql_db -c "select count(*) from public.bookings
+  where device_type_id = $device_id and starts_at = '2030-01-21 09:00+02'")
+[ "$partial" = 0 ] && check ok "the refused series wrote none of its dates" \
+  || check fail "the refused series wrote $partial booking(s) on its free date"
 
 exit "$failed"
