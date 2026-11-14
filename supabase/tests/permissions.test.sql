@@ -52,7 +52,7 @@ select is(
    where p.pronamespace = 'public'::regnamespace
      and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')
      and has_function_privilege('authenticated', p.oid, 'execute')),
-  array['available_quantity', 'create_booking', 'device_availability', 'is_admin', 'peak_usage', 'preview_series'],
+  array['available_quantity', 'commit_series', 'create_booking', 'device_availability', 'is_admin', 'peak_usage', 'preview_series'],
   'signed-in users can execute only the intended functions');
 
 select * from finish();

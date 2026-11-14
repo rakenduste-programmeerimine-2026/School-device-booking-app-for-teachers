@@ -50,6 +50,12 @@
 - Vigane väärtus (näiteks kogus "abc" või vale kuupäev) annab koodiga vea `invalid_quantity` või `invalid_range`, mitte andmebaasi teisendusviga.
 - Terve õppeaasta (158 kuupäeva) eelvaade võtab kohalikult umbes 30 ms, maksimaalne 1000 kuupäeva umbes 0,2 s.
 
+### Sarja kinnitamine
+- `commit_series(device_type_id, dates)` salvestab sarja: kas kõik kuupäevad või mitte ühtegi. Sisend on sama nagu `preview_series` puhul. Edu korral tagastatakse sarja id; sari kuulub kinnitajale ja igal kuupäeval on oma broneering.
+- Funktsioon lukustab seadme rea (`FOR UPDATE`) ja kontrollib iga kuupäeva uuesti, sest saadavus võib pärast eelvaadet muutuda.
+- Kui mõnel kuupäeval pole piisavalt vaba, tagastatakse viga `insufficient_capacity` ja ühtegi rida ei kirjutata. Vea detailis on konfliktid JSON-ina: `[{"date_position": 2, "free_quantity": 3}]`.
+- Muud vead on samad mis eelvaatel, lisaks `invalid_dates` tühja nimekirja korral. Sisendi reeglid on eelvaatega ühised (`check_series_dates`).
+
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.
 - Serveritoiming `createBooking` (`frontend/app/broneeringud/actions.ts`) kutsub `create_booking`. Kellaajad tõlgitakse Tallinna kohaliku ajana (`frontend/lib/tallinn-time.ts`), nii et suve- ja talveaeg on õige.
@@ -99,6 +105,6 @@
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
-- `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi ning koguarvu ei ületata kunagi. Skript kirjutab ajutised read ja kustutab need ise.
+- `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet, kord üksikbroneeringuga ja kord sarja kinnitamisega. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi, koguarvu ei ületata kunagi ja tagasi lükatud sarjast ei kirjutata ühtegi kuupäeva. Skript kirjutab ajutised read ja kustutab need ise.
 - CI käivitab mõlemad igal PR-il.
 - `npm test` kaustas `frontend`: Vitest testid (Tallinna aja teisendus ja sarja kuupäevad, sh suve-/talveajale üleminek ning õppetöövabade päevade vahelejätmine).
