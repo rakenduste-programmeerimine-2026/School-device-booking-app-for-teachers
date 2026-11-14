@@ -1,5 +1,5 @@
 begin;
-select plan(22);
+select plan(25);
 
 -- Fixed ids so seed data cannot interfere.
 insert into public.allowed_emails (email, role)
@@ -94,6 +94,24 @@ select throws_ok(
 select throws_ok(
   $$ select * from public.preview_series(9701, '{"starts_at": "2026-09-28T09:00:00+03:00"}'::jsonb) $$,
   'P0001', 'invalid_dates', 'input that is not a list is refused');
+select throws_ok(
+  $$ select * from public.preview_series(9701,
+    (select jsonb_agg(jsonb_build_object(
+       'starts_at', '2026-09-01'::timestamptz + n * interval '1 day',
+       'ends_at', '2026-09-01'::timestamptz + n * interval '1 day' + interval '1 hour',
+       'quantity', 1))
+     from generate_series(1, 1001) as n)) $$,
+  'P0001', 'invalid_dates', 'more than 1000 dates are refused');
+select throws_ok(
+  $$ select * from public.preview_series(9701, '[
+    {"starts_at": "2026-09-28T09:00:00+03:00", "ends_at": "2026-09-28T10:00:00+03:00", "quantity": "abc"}
+  ]'::jsonb) $$,
+  'P0001', 'invalid_quantity', 'a quantity that is not a number gives a coded error, not a cast error');
+select throws_ok(
+  $$ select * from public.preview_series(9701, '[
+    {"starts_at": "nope", "ends_at": "2026-09-28T10:00:00+03:00", "quantity": 1}
+  ]'::jsonb) $$,
+  'P0001', 'invalid_range', 'a time that is not a timestamp gives a coded error, not a cast error');
 
 -- Not signed in, or removed from the allow-list
 set local request.jwt.claims = '{"role":"authenticated"}';

@@ -46,8 +46,9 @@
 - `dates` on JSON-massiiv `[{ "starts_at", "ends_at", "quantity" }]`: kuupäevad tulevad funktsioonist `generateSeriesDates` ja igal kuupäeval on oma kogus, et õpetaja saaks konflikti korral ühe kuupäeva kogust vähendada. Sarja kinnitamine (#15) võtab sama sisendi.
 - Iga kuupäeva kohta tagastatakse `date_position` (järjekorranumber sisendis, alates 1), `starts_at`, `ends_at`, `quantity`, `free_quantity` (mitte alla 0) ja `has_conflict` (kui soovitud kogus on suurem kui vaba).
 - Vaba kogus arvutatakse samamoodi nagu `create_booking` puhul (tipukasutus, poolavatud vahemikud).
-- Vead: `not_authenticated`, `access_revoked`, `device_type_not_found`, `device_type_archived`, `invalid_dates` (sisend pole massiiv), `invalid_quantity`, `invalid_range` ja `overlapping_dates` (kaks sama sarja kuupäeva kattuvad; suurema vajaduse korral suurenda kogust).
-- Terve õppeaasta (158 kuupäeva) eelvaade võtab kohalikult umbes 30 ms.
+- Vead: `not_authenticated`, `access_revoked`, `device_type_not_found`, `device_type_archived`, `invalid_dates` (sisend pole massiiv või on üle 1000 kuupäeva), `invalid_quantity`, `invalid_range` ja `overlapping_dates` (kaks sama sarja kuupäeva kattuvad; suurema vajaduse korral suurenda kogust).
+- Vigane väärtus (näiteks kogus "abc" või vale kuupäev) annab koodiga vea `invalid_quantity` või `invalid_range`, mitte andmebaasi teisendusviga.
+- Terve õppeaasta (158 kuupäeva) eelvaade võtab kohalikult umbes 30 ms, maksimaalne 1000 kuupäeva umbes 0,2 s.
 
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.

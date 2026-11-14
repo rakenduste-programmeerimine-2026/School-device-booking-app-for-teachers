@@ -7,6 +7,8 @@
 
 -- Turns the JSON list into rows, numbered from 1 in input order. Shared with the commit (#15).
 -- It is parsed on each use rather than into a temporary table, because a preview must not write.
+-- A value that is not a valid timestamp or integer becomes null instead of a raw cast error,
+-- so the callers report it as invalid_range or invalid_quantity, codes the UI can show.
 create function public.series_dates_from_json(p_dates jsonb)
 returns table (date_position integer, starts_at timestamptz, ends_at timestamptz, quantity integer)
 language sql
@@ -15,9 +17,12 @@ set search_path = ''
 as $$
   select
     e.ordinality::integer,
-    (e.item ->> 'starts_at')::timestamptz,
-    (e.item ->> 'ends_at')::timestamptz,
-    (e.item ->> 'quantity')::integer
+    case when pg_input_is_valid(e.item ->> 'starts_at', 'timestamptz')
+      then (e.item ->> 'starts_at')::timestamptz end,
+    case when pg_input_is_valid(e.item ->> 'ends_at', 'timestamptz')
+      then (e.item ->> 'ends_at')::timestamptz end,
+    case when pg_input_is_valid(e.item ->> 'quantity', 'integer')
+      then (e.item ->> 'quantity')::integer end
   from jsonb_array_elements(p_dates) with ordinality as e (item, ordinality);
 $$;
 
@@ -65,7 +70,9 @@ begin
     raise exception 'device_type_archived';
   end if;
 
-  if p_dates is null or jsonb_typeof(p_dates) <> 'array' then
+  -- A full school year with three lessons every weekday is about 600 dates. The cap keeps a
+  -- hand-built request from making the overlap check (every pair of dates) arbitrarily slow.
+  if p_dates is null or jsonb_typeof(p_dates) <> 'array' or jsonb_array_length(p_dates) > 1000 then
     raise exception 'invalid_dates';
   end if;
 
