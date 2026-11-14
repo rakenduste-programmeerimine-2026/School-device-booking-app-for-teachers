@@ -41,6 +41,14 @@
 - Vead (tagastatakse veateatena): `not_authenticated`, `access_revoked` (e-post pole enam lubatud nimekirjas), `invalid_quantity`, `invalid_range`, `device_type_not_found`, `device_type_archived`, `insufficient_capacity` (detailis `available=N`). Vea korral ei kirjutata ühtegi rida.
 - `available_quantity(device_type_id, starts_at, ends_at)` tagastab vabade seadmete arvu ajavahemikus (näiteks 12 vaba 30-st). See pole kunagi negatiivne.
 
+### Sarja eelvaade
+- `preview_series(device_type_id, dates)` näitab enne kinnitamist iga kuupäeva vaba kogust ja konflikte. Ta ei kirjuta ühtegi rida.
+- `dates` on JSON-massiiv `[{ "starts_at", "ends_at", "quantity" }]`: kuupäevad tulevad funktsioonist `generateSeriesDates` ja igal kuupäeval on oma kogus, et õpetaja saaks konflikti korral ühe kuupäeva kogust vähendada. Sarja kinnitamine (#15) võtab sama sisendi.
+- Iga kuupäeva kohta tagastatakse `date_position` (järjekorranumber sisendis, alates 1), `starts_at`, `ends_at`, `quantity`, `free_quantity` (mitte alla 0) ja `has_conflict` (kui soovitud kogus on suurem kui vaba).
+- Vaba kogus arvutatakse samamoodi nagu `create_booking` puhul (tipukasutus, poolavatud vahemikud).
+- Vead: `not_authenticated`, `access_revoked`, `device_type_not_found`, `device_type_archived`, `invalid_dates` (sisend pole massiiv), `invalid_quantity`, `invalid_range` ja `overlapping_dates` (kaks sama sarja kuupäeva kattuvad; suurema vajaduse korral suurenda kogust).
+- Terve õppeaasta (158 kuupäeva) eelvaade võtab kohalikult umbes 30 ms.
+
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.
 - Serveritoiming `createBooking` (`frontend/app/broneeringud/actions.ts`) kutsub `create_booking`. Kellaajad tõlgitakse Tallinna kohaliku ajana (`frontend/lib/tallinn-time.ts`), nii et suve- ja talveaeg on õige.
