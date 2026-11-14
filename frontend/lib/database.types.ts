@@ -219,14 +219,24 @@ isOneToOne: false
                            },
 "device_availability":
 { Args: { "p_date": string,"p_ends": string,"p_starts": string }; Returns: {
-                    "free_quantity": number,"id": number,"name": string,"total_quantity": number
-                  }[]
+              "free_quantity": number,"id": number,"name": string,"total_quantity": number
+            }[]
                            },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "peak_usage":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_starts_at": string }; Returns: number
+                           },
+"preview_series":
+{ Args: { "p_dates": Json,"p_device_type_id": number }; Returns: {
+              "date_position": number,"ends_at": string,"free_quantity": number,"has_conflict": boolean,"quantity": number,"starts_at": string
+            }[]
+                           },
+"series_dates_from_json":
+{ Args: { "p_dates": Json }; Returns: {
+              "date_position": number,"ends_at": string,"quantity": number,"starts_at": string
+            }[]
                            }
           }
           Enums: {
