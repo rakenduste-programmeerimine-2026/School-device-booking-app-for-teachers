@@ -214,6 +214,9 @@ isOneToOne: false
             "available_quantity":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_starts_at": string }; Returns: number
                            },
+"bookings_in_scope":
+{ Args: { "p_booking_id": number,"p_booking_ids": (number)[],"p_scope": string }; Returns: number[]
+                           },
 "check_series_dates":
 { Args: { "p_dates": Json }; Returns: undefined
                            },
@@ -222,6 +225,9 @@ isOneToOne: false
                            },
 "create_booking":
 { Args: { "p_device_type_id": number,"p_ends_at": string,"p_quantity": number,"p_starts_at": string }; Returns: number
+                           },
+"delete_bookings":
+{ Args: { "p_booking_id": number,"p_booking_ids"?: (number)[],"p_scope": string }; Returns: number
                            },
 "device_availability":
 { Args: { "p_date": string,"p_ends": string,"p_starts": string }; Returns: {
@@ -243,6 +249,9 @@ isOneToOne: false
 { Args: { "p_dates": Json }; Returns: {
               "date_position": number,"ends_at": string,"quantity": number,"starts_at": string
             }[]
+                           },
+"update_bookings":
+{ Args: { "p_booking_id": number,"p_booking_ids"?: (number)[],"p_ends_time"?: string,"p_quantity"?: number,"p_scope": string,"p_starts_time"?: string }; Returns: number
                            }
           }
           Enums: {
