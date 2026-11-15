@@ -98,6 +98,9 @@ export function SeriesForm({ devices, lessons, schoolYear, periods, today }: Pro
   }
 
   function showPreview() {
+    // A new preview starts a new series, so the last result no longer applies.
+    setError("");
+    setSeriesSize(0);
     const dates = buildDates();
     if (typeof dates === "string") return setError(dates);
     if (dates.length === 0) return setError("Valitud päevadel pole perioodis ühtegi kuupäeva.");

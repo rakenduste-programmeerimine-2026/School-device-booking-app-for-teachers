@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { tallinnDate } from "@/lib/tallinn-time";
 import { SeriesForm } from "./series-form";
@@ -7,6 +8,8 @@ const todayInTallinn = () => tallinnDate(Date.now());
 
 // Read per request (inside Suspense), so the lists are never cached.
 async function Form() {
+  // "Today" must be the request's date, not the build's.
+  await connection();
   const supabase = await createClient();
   const today = todayInTallinn();
   const [{ data: devices }, { data: lessons }, { data: schoolYear }] = await Promise.all([
