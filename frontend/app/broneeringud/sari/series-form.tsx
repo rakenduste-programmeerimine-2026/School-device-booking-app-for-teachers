@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { generateSeriesDates } from "@/lib/series-dates";
-import { addDays } from "@/lib/tallinn-time";
+import { addDays, tallinnDate, tallinnToIso } from "@/lib/tallinn-time";
 import { commitSeries, previewSeries, type PreviewRow, type SeriesInput } from "../actions";
 
 type Device = { id: number; name: string; total_quantity: number };
@@ -36,6 +36,13 @@ const tallinnTime = new Intl.DateTimeFormat("et-EE", {
   hour: "2-digit",
   minute: "2-digit",
 });
+// "08:15" in Tallinn time, the format time inputs and lesson times use.
+const clock = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Tallinn",
+  hourCycle: "h23",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 // Every calendar day of a period, so a kept period keeps all its dates.
 function periodDates(p: Period): string[] {
@@ -57,6 +64,8 @@ export function SeriesForm({ devices, lessons, schoolYear, periods, today }: Pro
   const [error, setError] = useState("");
   const [seriesSize, setSeriesSize] = useState(0);
   const [pending, startTransition] = useTransition();
+  // Edits re-check at once, so a slower older answer must not overwrite a newer one.
+  const lastRequest = useRef(0);
 
   const device = devices.find((d) => d.id === deviceId);
   const single = device?.total_quantity === 1;
@@ -104,11 +113,50 @@ export function SeriesForm({ devices, lessons, schoolYear, periods, today }: Pro
     const dates = buildDates();
     if (typeof dates === "string") return setError(dates);
     if (dates.length === 0) return setError("Valitud päevadel pole perioodis ühtegi kuupäeva.");
+    runPreview(dates);
+  }
+
+  // Dates and rows are only ever set together, so commit always sends a previewed list.
+  // On error the previous preview stays as it was.
+  function runPreview(dates: SeriesInput[]) {
+    const request = ++lastRequest.current;
     startTransition(async () => {
       const result = await previewSeries(device!.id, dates);
+      if (request !== lastRequest.current) return;
       if (result.error) setError(result.error);
-      else setPreview({ dates, rows: result.rows ?? [] });
+      else {
+        setError("");
+        setPreview({ dates, rows: result.rows ?? [] });
+      }
     });
+  }
+
+  // Resolves one conflict: change the date's quantity or time, or skip it (null), then re-check.
+  function editDate(index: number, next: Partial<SeriesInput> | null) {
+    if (!preview) return;
+    const dates = next
+      ? preview.dates.map((d, i) => (i === index ? { ...d, ...next } : d))
+      : preview.dates.filter((_, i) => i !== index);
+    if (dates.length === 0) {
+      setPreview(null);
+      return setError("Kõik kuupäevad on vahele jäetud.");
+    }
+    runPreview(dates);
+  }
+
+  // A new time keeps the row's own Tallinn date.
+  function editTime(index: number, startsAt: string, start: string, end: string) {
+    const date = tallinnDate(startsAt);
+    editDate(index, { starts_at: tallinnToIso(date, start), ends_at: tallinnToIso(date, end) });
+  }
+
+  // Start and end are read together, so changing both fields sends one range rather than a
+  // mix of the new start and the old end. An unfinished range waits for the other field.
+  function applyFreeTime(field: HTMLInputElement, index: number, startsAt: string) {
+    const [start, end] = [...field.parentElement!.querySelectorAll<HTMLInputElement>("input[type=time]")].map(
+      (f) => f.value,
+    );
+    if (start && end && start < end) editTime(index, startsAt, start, end);
   }
 
   function commit() {
@@ -324,25 +372,86 @@ export function SeriesForm({ devices, lessons, schoolYear, periods, today }: Pro
                 <th className="pr-4">Kuupäev</th>
                 <th className="pr-4">Kellaaeg</th>
                 <th className="pr-4">Kogus</th>
-                <th>Vaba</th>
+                <th className="pr-4">Vaba</th>
+                {conflictCount > 0 && <th>Lahenda</th>}
               </tr>
             </thead>
             <tbody>
-              {preview.rows.map((r) => (
-                <tr key={r.date_position} className={r.has_conflict ? "text-red-600" : undefined}>
+              {preview.rows.map((r, i) => {
+                const start = clock.format(new Date(r.starts_at));
+                const end = clock.format(new Date(r.ends_at));
+                const lesson = lessons.find((l) => hhmm(l.starts_time) === start && hhmm(l.ends_time) === end);
+                return (
+                // Inputs below apply on blur from their default value; a new key resets them to the
+                // previewed values after each re-check.
+                <tr key={`${r.date_position}-${r.starts_at}-${r.ends_at}-${r.quantity}`} className={r.has_conflict ? "text-red-600" : undefined}>
                   <td className="pr-4">{tallinnDay.format(new Date(r.starts_at))}</td>
-                  <td className="pr-4">
+                  <td className="whitespace-nowrap pr-4">
                     {tallinnTime.format(new Date(r.starts_at))}–{tallinnTime.format(new Date(r.ends_at))}
                   </td>
                   <td className="pr-4">{r.quantity}</td>
-                  <td>{r.free_quantity}</td>
+                  <td className="pr-4 font-semibold">{r.free_quantity}</td>
+                  {conflictCount > 0 && (
+                    <td>
+                      {r.has_conflict && (
+                        <div className="flex flex-wrap items-center gap-2 py-1 text-foreground">
+                          {!single && (
+                            <input
+                              aria-label="Uus kogus"
+                              type="number"
+                              min={1}
+                              max={device?.total_quantity}
+                              defaultValue={r.quantity}
+                              onBlur={(e) => {
+                                const q = e.target.valueAsNumber;
+                                if (q >= 1 && q !== r.quantity) editDate(i, { quantity: q });
+                              }}
+                              className={`${input} w-20`}
+                            />
+                          )}
+                          <select
+                            aria-label="Muu koolitund"
+                            className={input}
+                            value={lesson?.id ?? ""}
+                            onChange={(e) => {
+                              const l = lessons.find((x) => String(x.id) === e.target.value);
+                              if (l) editTime(i, r.starts_at, hhmm(l.starts_time), hhmm(l.ends_time));
+                            }}
+                          >
+                            <option value="">Vaba aeg</option>
+                            {lessons.map((l) => (
+                              <option key={l.id} value={l.id}>{l.lesson_number}. tund</option>
+                            ))}
+                          </select>
+                          <input
+                            aria-label="Uus algus"
+                            type="time"
+                            className={input}
+                            defaultValue={start}
+                            onBlur={(e) => applyFreeTime(e.currentTarget, i, r.starts_at)}
+                          />
+                          <input
+                            aria-label="Uus lõpp"
+                            type="time"
+                            className={input}
+                            defaultValue={end}
+                            onBlur={(e) => applyFreeTime(e.currentTarget, i, r.starts_at)}
+                          />
+                          <button type="button" className="underline" onClick={() => editDate(i, null)}>
+                            Jäta vahele
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  )}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
           {conflictCount > 0 && (
             <p role="alert" className="text-red-600">
-              Mõnel kuupäeval pole piisavalt vabu seadmeid. Muuda kogust või aega ja vaata eelvaadet uuesti.
+              Mõnel kuupäeval pole piisavalt vabu seadmeid. Lahenda konfliktid: muuda kogust, vali muu aeg või jäta kuupäev vahele.
             </p>
           )}
           <button
