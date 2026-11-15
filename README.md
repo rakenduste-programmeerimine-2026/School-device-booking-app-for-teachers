@@ -99,8 +99,9 @@
 - Avalehelt link "Korduv broneering". Õpetaja valib seadme ja koguse (ühe tükina seadme puhul koguse välja ei näidata) ning ühe või mitu rida "nädalapäev + aeg". Aeg on koolitund (algus ja lõpp täituvad ise) või vabalt sisestatud algus- ja lõpuaeg. Sama nädalapäeva võib lisada mitu korda, näiteks esmaspäeval 2. ja 5. tund.
 - Periood on vaikimisi õppeaasta lõpuni: algus on tänane päev (või õppeaasta algus, kui see on hiljem), lõpp õppeaasta viimane päev. Mõlemat saab muuta õppeaasta piires.
 - Õppetöövabad ajad jäetakse vaikimisi vahele. Iga perioodi (vaheaeg, püha, õppetöövaba päev) saab linnukesega sarja alles jätta.
-- "Näita eelvaadet" kutsub `preview_series` ja näitab iga kuupäeva aega, kogust ja vaba kogust. Konfliktiga read on punased ja siis sarja kinnitada ei saa: muuda kogust või aega ja vaata eelvaadet uuesti. Konfliktide lahendamine kuupäevade kaupa tuleb issue'ga #17.
-- "Kinnita sari" kutsub `commit_series` täpselt nende kuupäevadega, mis olid eelvaates. Iga muudatus vormis kustutab eelvaate. Kui keegi broneeris vahepeal, ei salvestata midagi ja eelvaates märgitakse uued konfliktid.
+- "Näita eelvaadet" kutsub `preview_series` ja näitab iga kuupäeva aega, kogust ja vaba kogust. Konfliktiga read on punased ja seni sarja kinnitada ei saa.
+- Iga konfliktiga rea juures saab konflikti lahendada: muuta selle kuupäeva kogust (ühe tükina seadme puhul koguse välja pole), valida teise koolitunni või sisestada uue algus- ja lõpuaja (kuupäev jääb samaks) või vajutada "Jäta vahele", mis eemaldab kuupäeva sarjast. Kogus ja kellaajad rakenduvad, kui väljalt lahkuda. Iga muudatuse järel kontrollitakse vabu seadmeid kohe uuesti. Kui uus aeg ei sobi (näiteks kattub sarja teise ajaga), näidatakse viga ja eelvaade jääb endiseks.
+- "Kinnita sari" kutsub `commit_series` täpselt nende kuupäevadega, mis olid viimases eelvaates, ja on lubatud alles siis, kui konflikte pole. Iga muudatus vormi ülaosas kustutab eelvaate. Kui keegi broneeris vahepeal, ei salvestata midagi ja eelvaates märgitakse uued konfliktid, mida saab samamoodi lahendada.
 - Serveritoimingud `previewSeries` ja `commitSeries` on failis `frontend/app/broneeringud/actions.ts`. Õppeaasta, perioodid, seadmed ja tunnid loetakse iga päringu ajal.
 
 ### Broneeringute ülevaade (leht `/broneeringud`)
