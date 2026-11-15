@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/database.types";
 import { addDays, tallinnDate, tallinnToIso } from "@/lib/tallinn-time";
@@ -37,7 +38,6 @@ const shortDate = new Intl.DateTimeFormat("et-EE", {
 
 const asDate = (day: string) => new Date(`${day}T00:00:00Z`);
 
-// A Server Component renders once per request, so reading the clock here is stable.
 const todayInTallinn = () => tallinnDate(Date.now());
 
 function mondayOf(date: string): string {
@@ -55,6 +55,8 @@ async function Week({ searchParams }: Pick<PageProps<"/broneeringud">, "searchPa
     typeof week === "string" && /^\d{4}-\d{2}-\d{2}$/.test(week) && !Number.isNaN(asDate(week).getTime())
       ? week
       : "";
+  // "Today" must be the request's date, not the build's.
+  await connection();
   const monday = mondayOf(requested || todayInTallinn());
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const sunday = days[6];
