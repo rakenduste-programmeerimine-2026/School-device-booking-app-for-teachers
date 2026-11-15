@@ -61,6 +61,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <Link href="/broneeringud" className="underline">
         Vaata broneeringuid
       </Link>
+      <Link href="/broneeringud/sari" className="underline">
+        Korduv broneering
+      </Link>
       <h1 className="text-2xl font-semibold">Broneeri seade</h1>
       <Suspense>
         <Picker searchParams={searchParams} />

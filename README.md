@@ -93,7 +93,15 @@
 ### Sarja kuupäevad
 - `generateSeriesDates` (`frontend/lib/series-dates.ts`) annab õppeaasta kõik valitud nädalapäevade kuupäevad koos algus- ja lõpuajaga (UTC ISO). Kuupäevi käiakse läbi kalendripäevadena ja kellaaeg tehakse Tallinna aja järgi, seega suve- ja talveajale üleminek ei nihuta tunde.
 - Vaheajad, riigipühad ja õppetöövabad päevad (piirid kaasa arvatud) jäetakse välja, välja arvatud kuupäevad, mille õpetaja jätab `keepDates` kaudu sarja alles.
-- Funktsioon ei loe andmebaasi: õppeaasta ja perioodid antakse sisse. See on veel ühegi lehega ühendamata.
+- Funktsioon ei loe andmebaasi: õppeaasta ja perioodid antakse sisse. Seda kasutab korduva broneeringu vorm.
+
+### Korduv broneering (leht `/broneeringud/sari`)
+- Avalehelt link "Korduv broneering". Õpetaja valib seadme ja koguse (ühe tükina seadme puhul koguse välja ei näidata) ning ühe või mitu rida "nädalapäev + aeg". Aeg on koolitund (algus ja lõpp täituvad ise) või vabalt sisestatud algus- ja lõpuaeg. Sama nädalapäeva võib lisada mitu korda, näiteks esmaspäeval 2. ja 5. tund.
+- Periood on vaikimisi õppeaasta lõpuni: algus on tänane päev (või õppeaasta algus, kui see on hiljem), lõpp õppeaasta viimane päev. Mõlemat saab muuta õppeaasta piires.
+- Õppetöövabad ajad jäetakse vaikimisi vahele. Iga perioodi (vaheaeg, püha, õppetöövaba päev) saab linnukesega sarja alles jätta.
+- "Näita eelvaadet" kutsub `preview_series` ja näitab iga kuupäeva aega, kogust ja vaba kogust. Konfliktiga read on punased ja siis sarja kinnitada ei saa: muuda kogust või aega ja vaata eelvaadet uuesti. Konfliktide lahendamine kuupäevade kaupa tuleb issue'ga #17.
+- "Kinnita sari" kutsub `commit_series` täpselt nende kuupäevadega, mis olid eelvaates. Iga muudatus vormis kustutab eelvaate. Kui keegi broneeris vahepeal, ei salvestata midagi ja eelvaates märgitakse uued konfliktid.
+- Serveritoimingud `previewSeries` ja `commitSeries` on failis `frontend/app/broneeringud/actions.ts`. Õppeaasta, perioodid, seadmed ja tunnid loetakse iga päringu ajal.
 
 ### Broneeringute ülevaade (leht `/broneeringud`)
 - Näitab ühe nädala (esmaspäevast pühapäevani) kõigi õpetajate broneeringuid. Iga rea juures on kellaaeg (Tallinna aja järgi), seade, kogus ja broneerija nimi (vaatest `profile_names`, teiste e-posti ega rolli ei näidata).

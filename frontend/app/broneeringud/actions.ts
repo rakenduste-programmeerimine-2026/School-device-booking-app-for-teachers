@@ -12,7 +12,58 @@ const errorMessages: Record<string, string> = {
   invalid_range: "Lõppaeg peab olema algusajast hilisem.",
   device_type_not_found: "Seadet ei leitud.",
   device_type_archived: "See seade on arhiveeritud ega ole broneeritav.",
+  invalid_dates: "Sarjas pole ühtegi kuupäeva või on neid liiga palju.",
+  overlapping_dates: "Sarja ajad kattuvad omavahel. Vajadusel suurenda kogust.",
 };
+
+// The same list goes to preview and commit, so the committed dates are the previewed ones.
+export type SeriesInput = { starts_at: string; ends_at: string; quantity: number };
+export type PreviewRow = {
+  date_position: number;
+  starts_at: string;
+  ends_at: string;
+  quantity: number;
+  free_quantity: number;
+  has_conflict: boolean;
+};
+export type Conflict = { date_position: number; free_quantity: number };
+
+export async function previewSeries(
+  deviceTypeId: number,
+  dates: SeriesInput[],
+): Promise<{ rows?: PreviewRow[]; error?: string }> {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims) return { error: errorMessages.not_authenticated };
+
+  const { data, error } = await supabase.rpc("preview_series", {
+    p_device_type_id: deviceTypeId,
+    p_dates: dates,
+  });
+  if (error) return { error: errorMessages[error.message] ?? "Eelvaade ebaõnnestus." };
+  return { rows: data };
+}
+
+export async function commitSeries(
+  deviceTypeId: number,
+  dates: SeriesInput[],
+): Promise<{ seriesId?: number; conflicts?: Conflict[]; error?: string }> {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims) return { error: errorMessages.not_authenticated };
+
+  const { data, error } = await supabase.rpc("commit_series", {
+    p_device_type_id: deviceTypeId,
+    p_dates: dates,
+  });
+  if (!error) return { seriesId: data };
+
+  // Availability changed after the preview; the detail lists the dates that no longer fit.
+  if (error.message === "insufficient_capacity") {
+    return { conflicts: JSON.parse(error.details ?? "[]") as Conflict[] };
+  }
+  return { error: errorMessages[error.message] ?? "Sarja salvestamine ebaõnnestus." };
+}
 
 export async function createBooking(_prev: BookingState, formData: FormData): Promise<BookingState> {
   const supabase = await createClient();
