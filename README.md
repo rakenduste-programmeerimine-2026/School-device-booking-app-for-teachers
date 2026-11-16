@@ -56,6 +56,19 @@
 - Kui mõnel kuupäeval pole piisavalt vaba, tagastatakse viga `insufficient_capacity` ja ühtegi rida ei kirjutata. Vea detailis on konfliktid JSON-ina: `[{"date_position": 2, "free_quantity": 3}]`.
 - Muud vead on samad mis eelvaatel, lisaks `invalid_dates` tühja nimekirja korral. Sisendi reeglid on eelvaatega ühised (`check_series_dates`).
 
+### Broneeringute muutmine ja kustutamine
+- `delete_bookings(booking_id, scope, booking_ids)` kustutab ja `update_bookings(booking_id, scope, booking_ids, quantity, starts_time, ends_time)` muudab broneeringuid. Mõlemad tagastavad muudetud ridade arvu ja kasutavad sama valikuloogikat (`bookings_in_scope`).
+- `booking_id` on broneering, millel kasutaja klõpsas. `scope` on:
+  - `one`: ainult see broneering
+  - `following`: see ja kõik järgmised sama sarja broneeringud
+  - `series`: terve sari
+  - `selected`: `booking_ids` loetelu, kõik samast sarjast
+- Sarja ulatusega muudatused (`following`, `series`, `selected`) puudutavad ainult tulevasi broneeringuid; möödunud jäävad ajaloona alles. Ühte möödunud broneeringut (`one`) saab parandada või kustutada ainult admin.
+- Õpetaja muudab ainult enda broneeringuid, admin kõiki.
+- `update_bookings`: tühi väärtus jätab vana alles. Uus algus- ja lõpuaeg on Tallinna kellaaeg iga broneeringu enda kuupäeval, nii et terve sarja teise tundi tõstmine on õige ka suve- ja talveaja vahetusel. Mahtu kontrollitakse uuesti; kui mõni kuupäev ei mahu, tagastatakse `insufficient_capacity` (detailis `[{"booking_id", "free_quantity"}]`) ja midagi ei muudeta.
+- Kui sarjast ei jää ühtegi broneeringut, kustutatakse ka sari. Ajalugu säilib.
+- Vead: `not_authenticated`, `access_revoked`, `booking_not_found`, `not_allowed`, `booking_in_past`, `invalid_scope`, `invalid_selection`, `no_bookings`, `nothing_to_change`, `invalid_quantity`, `invalid_range`, `insufficient_capacity`.
+
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.
 - Serveritoiming `createBooking` (`frontend/app/broneeringud/actions.ts`) kutsub `create_booking`. Kellaajad tõlgitakse Tallinna kohaliku ajana (`frontend/lib/tallinn-time.ts`), nii et suve- ja talveaeg on õige.
