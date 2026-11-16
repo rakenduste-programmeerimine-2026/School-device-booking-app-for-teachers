@@ -13,9 +13,16 @@ async function CurrentUser() {
     .eq("id", data!.claims.sub)
     .single();
   return (
-    <p>
-      {profile?.email} ({profile?.role === "admin" ? "admin" : "õpetaja"})
-    </p>
+    <div className="flex flex-col gap-2">
+      <p>
+        {profile?.email} ({profile?.role === "admin" ? "admin" : "õpetaja"})
+      </p>
+      {profile?.role === "admin" && (
+        <Link href="/haldus" className="underline">
+          Haldus
+        </Link>
+      )}
+    </div>
   );
 }
 
