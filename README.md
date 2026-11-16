@@ -68,6 +68,7 @@
 - `update_bookings`: tühi väärtus jätab vana alles. Uus algus- ja lõpuaeg on Tallinna kellaaeg iga broneeringu enda kuupäeval, nii et terve sarja teise tundi tõstmine on õige ka suve- ja talveaja vahetusel. Mahtu kontrollitakse uuesti; kui mõni kuupäev ei mahu, tagastatakse `insufficient_capacity` (detailis `[{"booking_id", "free_quantity"}]`) ja midagi ei muudeta.
 - Kui sarjast ei jää ühtegi broneeringut, kustutatakse ka sari. Ajalugu säilib.
 - Vead: `not_authenticated`, `access_revoked`, `booking_not_found`, `not_allowed`, `booking_in_past`, `invalid_scope`, `invalid_selection`, `no_bookings`, `nothing_to_change`, `invalid_quantity`, `invalid_range`, `insufficient_capacity`.
+- Serveritoimingud `updateBookings` ja `deleteBookings` (`frontend/app/broneeringud/actions.ts`) kontrollivad kasutajat `getClaims()`-iga, kutsuvad ülaltoodud funktsioone ja tõlgivad vead eestikeelseks teateks. Mahu puudumisel tagastab `updateBookings` konfliktide loetelu (`conflicts`) ja midagi ei muudeta. Kasutajaliidest veel pole.
 
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.

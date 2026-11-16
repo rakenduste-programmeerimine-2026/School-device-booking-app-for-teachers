@@ -14,6 +14,13 @@ const errorMessages: Record<string, string> = {
   device_type_archived: "See seade on arhiveeritud ega ole broneeritav.",
   invalid_dates: "Sarjas pole ühtegi kuupäeva või on neid liiga palju.",
   overlapping_dates: "Sarja ajad kattuvad omavahel. Vajadusel suurenda kogust.",
+  booking_not_found: "Broneeringut ei leitud.",
+  not_allowed: "Sa võid muuta ainult oma broneeringuid.",
+  booking_in_past: "Möödunud broneeringut saab muuta ainult admin.",
+  invalid_selection: "Vali sama sarja broneeringud.",
+  invalid_scope: "Tundmatu muutmise ulatus.",
+  no_bookings: "Valitud ulatuses pole tulevasi broneeringuid.",
+  nothing_to_change: "Muuda kogust või aega.",
 };
 
 // The same list goes to preview and commit, so the committed dates are the previewed ones.
@@ -115,4 +122,53 @@ export async function createBooking(_prev: BookingState, formData: FormData): Pr
     return { error: `Valitud ajal on vabu seadmeid ainult ${free}.` };
   }
   return { error: errorMessages[error.message] ?? "Broneerimine ebaõnnestus." };
+}
+
+// 'one' / 'following' / 'series' act on the clicked booking's series; 'selected' also needs bookingIds.
+export type Scope = "one" | "following" | "series" | "selected";
+export type BookingConflict = { booking_id: number; free_quantity: number };
+
+export async function updateBookings(
+  bookingId: number,
+  scope: Scope,
+  change: { quantity?: number; startsTime?: string; endsTime?: string },
+  bookingIds?: number[],
+): Promise<{ updated?: number; conflicts?: BookingConflict[]; error?: string }> {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims) return { error: errorMessages.not_authenticated };
+
+  const { data, error } = await supabase.rpc("update_bookings", {
+    p_booking_id: bookingId,
+    p_scope: scope,
+    p_booking_ids: bookingIds,
+    p_quantity: change.quantity,
+    p_starts_time: change.startsTime,
+    p_ends_time: change.endsTime,
+  });
+  if (!error) return { updated: data };
+
+  // Nothing was saved; the detail lists the bookings that no longer fit.
+  if (error.message === "insufficient_capacity") {
+    return { conflicts: JSON.parse(error.details ?? "[]") as BookingConflict[] };
+  }
+  return { error: errorMessages[error.message] ?? "Muutmine ebaõnnestus." };
+}
+
+export async function deleteBookings(
+  bookingId: number,
+  scope: Scope,
+  bookingIds?: number[],
+): Promise<{ deleted?: number; error?: string }> {
+  const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
+  if (!claims) return { error: errorMessages.not_authenticated };
+
+  const { data, error } = await supabase.rpc("delete_bookings", {
+    p_booking_id: bookingId,
+    p_scope: scope,
+    p_booking_ids: bookingIds,
+  });
+  if (error) return { error: errorMessages[error.message] ?? "Kustutamine ebaõnnestus." };
+  return { deleted: data };
 }
