@@ -16,7 +16,7 @@
 6. Who may edit other teachers' bookings: nobody except admins. Teachers edit only their own bookings; admins edit all.
 7. May past bookings be changed by series edits: No. Series edits change only future bookings; past bookings stay as history. As an exception, admins may correct a past booking, and the change is kept in the change history.
 8. Milestone deadlines: M0 Foundation 2026-11-08, M1 Quantity booking 2026-11-11, M2 Recurring series 2026-11-14, M3 Bulk edit 2026-11-16, M4 Pilot and release 2026-11-18. The whole project deadline is 2026-11-18.
-9. Where Supabase runs and who owns Vercel: Supabase runs locally from the Supabase CLI (`supabase start`), with no hosted project. Vercel: Tanel Metshein (w1ttyrat).
+9. Where Supabase runs and who owns Vercel: Supabase runs locally from the Supabase CLI (`supabase start`), with no hosted project for development. Exception: a separate hosted Supabase project, owned by the person who sets it up on a personal account and outside any GitHub-linked integration, serves only the Vercel preview (see README, "Vercel preview"). Vercel: Tanel Metshein (w1ttyrat).
 10. Is the repo public or private, and is it in an organization: public, in the organization rakenduste-programmeerimine-2026.
 
 ## Stack
