@@ -263,6 +263,9 @@ export default function AdminPage({ searchParams }: PageProps<"/haldus">) {
         Avalehele
       </Link>
       <h1 className="text-2xl font-semibold">Haldus</h1>
+      <Link href="/haldus/ajalugu" className="underline">
+        Broneeringute muudatuste ajalugu
+      </Link>
       <Suspense>
         <Admin searchParams={searchParams} />
       </Suspense>

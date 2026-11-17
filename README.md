@@ -145,6 +145,13 @@
 - Serveritoimingud: `addSchoolYear`, `updateSchoolYear`, `addNonTeachingPeriod`, `updateNonTeachingPeriod`, `deleteNonTeachingPeriod` (liik `break`, `public_holiday` või `day_off`), `addLessonPeriod`, `updateLessonPeriod`, `deleteLessonPeriod`.
 - Serveritoimingud on failis `frontend/app/haldus/actions.ts`; veateated tulevad aadressi parameetriga `?error=`.
 
+### Muudatuste ajalugu (leht `/haldus/ajalugu`)
+- Halduse lehel on link "Broneeringute muudatuste ajalugu". Leht näitab tabelist `booking_changes` iga muudatuse aega (Tallinna aja järgi), tegijat (nimi ja e-post), toimingut (Lisatud, Muudetud, Kustutatud), broneeringu ja sarja numbrit ning broneeringu andmeid enne ja pärast (seade, kuupäev, kellaaeg, kogus).
+- Kustutatud broneeringute ja sarjade ajalugu on samuti nähtav. Arhiveeritud seadmete nimed kuvatakse ka.
+- Uusimad muudatused on eespool, 100 rida lehel; link "Vanemad muudatused" näitab järgmised (`?before=<id>`).
+- Tavaõpetaja suunatakse avalehele ja RLS ei lase tal ajalugu lugeda.
+- Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
+
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
