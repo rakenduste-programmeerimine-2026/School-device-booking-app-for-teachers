@@ -97,6 +97,10 @@ export function SeriesBookings({ series, lessons, isAdmin }: { series: Series; l
     if (change.quantity === undefined && !change.startsTime && !change.endsTime) {
       return setError("Muuda kogust või aega.");
     }
+    // Only one free time would keep the other end, which is rarely meant and fails confusingly.
+    if (time === "free" && (!start || !end)) {
+      return setError("Sisesta vaba aja algus ja lõpp.");
+    }
     startTransition(async () => {
       const result = await updateBookings(anchor!.id, scope, change, scope === "selected" ? selected : undefined);
       if (result.conflicts) {
@@ -149,7 +153,8 @@ export function SeriesBookings({ series, lessons, isAdmin }: { series: Series; l
           <button
             type="button"
             className={`${button} self-start`}
-            onClick={() => open(series.bookings.find((b) => b.id === selected[0])!, "selected")}
+            // The earliest selected date, not the first one ticked, so the panel title matches the list.
+            onClick={() => open(series.bookings.find((b) => selected.includes(b.id))!, "selected")}
           >
             Muuda või kustuta valitud ({selected.length})
           </button>
