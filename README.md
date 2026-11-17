@@ -130,6 +130,7 @@
 - Avalehel on adminile link "Haldus". Tavaõpetaja suunatakse avalehele ja tema päringud tabelitele lükkab tagasi RLS.
 - Seadmed: admin lisab seadme (nimi, kogus), muudab nime ja kogust ning arhiveerib või taastab seadme. Lehelt seadet ei kustutata, vanad broneeringud säilivad.
 - Lubatud e-postid: admin lisab e-posti koos rolliga ja eemaldab selle. Eemaldatud kasutaja blokeeritakse (vt "Ligipääs ja lubatud e-postid"). Viimase admini eemaldamine annab veateate.
+- Õppeaasta ja koolitunnid: serveritoimingud lisavad, muudavad ja kustutavad õppeaastaid (`addSchoolYear`, `updateSchoolYear`, `deleteSchoolYear`), õppetöövabu perioode (`addNonTeachingPeriod`, `updateNonTeachingPeriod`, `deleteNonTeachingPeriod`; liik `break`, `public_holiday` või `day_off`) ja koolitunde (`addLessonPeriod`, `updateLessonPeriod`, `deleteLessonPeriod`). Õppeaasta kustutamine kustutab ka selle perioodid. Nende vormid lisab eraldi issue; siin on ainult toimingud.
 - Serveritoimingud on failis `frontend/app/haldus/actions.ts`; veateated tulevad aadressi parameetriga `?error=`.
 
 ## Testid
