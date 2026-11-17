@@ -6,6 +6,11 @@ import { addDays, tallinnDate, tallinnToIso } from "../lib/tallinn-time";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+// The test creates users with a known password and deletes data by name: never run it on a hosted project.
+const { hostname } = new URL(url);
+if (!["127.0.0.1", "localhost"].includes(hostname)) {
+  throw new Error(`E2E tests only run against local Supabase, not ${hostname}`);
+}
 // Only the test setup uses this key (to allow-list the test users); the app never sees it.
 const admin = createClient<Database>(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
