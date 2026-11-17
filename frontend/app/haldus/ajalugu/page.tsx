@@ -55,12 +55,10 @@ async function History({ searchParams }: Pick<PageProps<"/haldus/ajalugu">, "sea
   const { before } = await searchParams;
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", claims!.claims.sub)
-    .single();
-  if (profile?.role !== "admin") redirect("/");
+  if (!claims) redirect("/login");
+  // Same check as the admin actions, so the page and the actions follow the allow-list together.
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+  if (!isAdmin) redirect("/");
 
   // Ordered by id, not changed_at: id follows the order rows were written, and a single id
   // is enough for the "older" link. Rows of one bulk edit share changed_at anyway.
