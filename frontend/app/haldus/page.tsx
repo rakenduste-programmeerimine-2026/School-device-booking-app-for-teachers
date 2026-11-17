@@ -91,12 +91,10 @@ async function Admin({ searchParams }: Pick<PageProps<"/haldus">, "searchParams"
   const { error } = await searchParams;
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", claims!.claims.sub)
-    .single();
-  if (profile?.role !== "admin") redirect("/");
+  if (!claims) redirect("/login");
+  // Same check as the admin actions, so the page and the actions follow the allow-list together.
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+  if (!isAdmin) redirect("/");
 
   const [{ data: devices }, { data: emails }, { data: schoolYears }, { data: lessons }] = await Promise.all([
     supabase.from("device_types").select("id, name, total_quantity, archived_at").order("name"),
@@ -111,8 +109,9 @@ async function Admin({ searchParams }: Pick<PageProps<"/haldus">, "searchParams"
 
   return (
     <>
+      {/* Sticky because the forms are far down the page and the error would scroll out of view. */}
       {typeof error === "string" && (
-        <p role="alert" className="text-red-600">
+        <p role="alert" className="sticky top-0 z-10 border border-red-600 bg-background p-2 text-red-600">
           {error}
         </p>
       )}
