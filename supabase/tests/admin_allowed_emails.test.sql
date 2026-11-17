@@ -1,5 +1,5 @@
 begin;
-select plan(6);
+select plan(10);
 
 insert into public.allowed_emails (email, role)
   values ('boss@example.com', 'admin'), ('teacher@example.com', 'teacher');
@@ -34,6 +34,30 @@ set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000a1","r
 select throws_ok(
   $$ delete from public.allowed_emails where email = 'boss@example.com' $$,
   'P0001', 'last_admin', 'the last admin cannot be removed');
+
+-- Demoting: remove and re-add as teacher. The profile follows and admin rights go at once.
+reset role;
+insert into public.allowed_emails (email, role) values ('boss2@example.com', 'admin');
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000c1', 'boss2@example.com');
+delete from public.allowed_emails where email = 'boss2@example.com';
+insert into public.allowed_emails (email, role) values ('boss2@example.com', 'teacher');
+select is((select role from public.profiles where email = 'boss2@example.com'), 'teacher',
+  're-adding as teacher demotes the profile');
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}';
+select is((select public.is_admin()), false, 'a demoted admin is no longer admin');
+
+-- A removed admin cannot add their own email back while their token is still valid.
+reset role;
+delete from public.allowed_emails where email = 'boss2@example.com';
+insert into public.allowed_emails (email, role) values ('boss2@example.com', 'admin');
+delete from public.allowed_emails where email = 'boss2@example.com';
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}';
+select throws_ok(
+  $$ insert into public.allowed_emails (email, role) values ('boss2@example.com', 'admin') $$,
+  '42501', null, 'a removed admin cannot re-add themselves');
+select is((select public.is_admin()), false, 'a removed admin is not admin');
 
 select * from finish();
 rollback;

@@ -21,6 +21,7 @@
 
 ### Ligipääs ja lubatud e-postid
 - `allowed_emails`: ainult siin olevate e-postidega saab sisse logida. Admin saab e-posti lugeda, lisada (rolliga õpetaja või admin) ja eemaldada; õpetaja ei näe tabelit ega saa seda muuta. Rolli ega aadressi muuta ei saa: eemalda ja lisa uuesti.
+- Admini õigus tuleb nimekirjast: `is_admin()` kontrollib `allowed_emails` rolli, mitte ainult `profiles.role`. Eemaldatud või õpetajaks muudetud admin kaotab õigused kohe, ka kehtiva pääsutõendi ajal, ega saa end uuesti lisada. Lisamisel seatakse ka `profiles.role` nimekirja rolli järgi.
 - E-posti eemaldamisel blokeeritakse kasutaja ja tema sessioonid lõpetatakse. Ta ei saa uuesti sisse logida ega sessiooni pikendada.
 - **Ooteaeg kuni 1 tund:** juba väljastatud pääsutõend kehtib kuni aegumiseni (`jwt_expiry`, 1 tund). Selle aja jooksul saab eemaldatud kasutaja veel andmeid lugeda ja kirjutavaid funktsioone kutsuda; eemaldatud admin ka seadmeid muuta. Kirjutavad funktsioonid (#8 ja edasi) kontrollivad seepärast ka lubatud e-postide nimekirja.
 - E-posti uuesti lisamisel saab kasutaja jälle sisse logida. Muul põhjusel (näiteks käsitsi) pandud blokeeringut see ei tühista.
