@@ -20,7 +20,8 @@
 - Kõik sisseloginud kasutajad saavad tunde lugeda, muuta saab ainult admin.
 
 ### Ligipääs ja lubatud e-postid
-- `allowed_emails`: ainult siin olevate e-postidega saab sisse logida.
+- `allowed_emails`: ainult siin olevate e-postidega saab sisse logida. Admin saab e-posti lugeda, lisada (rolliga õpetaja või admin) ja eemaldada; õpetaja ei näe tabelit ega saa seda muuta. Rolli ega aadressi muuta ei saa: eemalda ja lisa uuesti.
+- Admini õigus tuleb nimekirjast: `is_admin()` kontrollib `allowed_emails` rolli, mitte ainult `profiles.role`. Eemaldatud või õpetajaks muudetud admin kaotab õigused kohe, ka kehtiva pääsutõendi ajal, ega saa end uuesti lisada. Lisamisel seatakse ka `profiles.role` nimekirja rolli järgi.
 - E-posti eemaldamisel blokeeritakse kasutaja ja tema sessioonid lõpetatakse. Ta ei saa uuesti sisse logida ega sessiooni pikendada.
 - **Ooteaeg kuni 1 tund:** juba väljastatud pääsutõend kehtib kuni aegumiseni (`jwt_expiry`, 1 tund). Selle aja jooksul saab eemaldatud kasutaja veel andmeid lugeda ja kirjutavaid funktsioone kutsuda; eemaldatud admin ka seadmeid muuta. Kirjutavad funktsioonid (#8 ja edasi) kontrollivad seepärast ka lubatud e-postide nimekirja.
 - E-posti uuesti lisamisel saab kasutaja jälle sisse logida. Muul põhjusel (näiteks käsitsi) pandud blokeeringut see ei tühista.
@@ -124,6 +125,12 @@
 - Iga päev on nähtav ka siis, kui broneeringuid pole. Õppetöövabad päevad on eraldi värviga märgitud: koolivaheaeg (kollane), riigipüha (punane), õppetöövaba päev (sinine), koos perioodi nimega.
 - Vaade on ainult lugemiseks: muutmise ja kustutamise nuppe pole ning kliendid ei saa tabelisse `bookings` otse kirjutada.
 - Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
+
+### Haldus (leht `/haldus`)
+- Avalehel on adminile link "Haldus". Tavaõpetaja suunatakse avalehele ja tema päringud tabelitele lükkab tagasi RLS.
+- Seadmed: admin lisab seadme (nimi, kogus), muudab nime ja kogust ning arhiveerib või taastab seadme. Lehelt seadet ei kustutata, vanad broneeringud säilivad.
+- Lubatud e-postid: admin lisab e-posti koos rolliga ja eemaldab selle. Eemaldatud kasutaja blokeeritakse (vt "Ligipääs ja lubatud e-postid"). Viimase admini eemaldamine annab veateate.
+- Serveritoimingud on failis `frontend/app/haldus/actions.ts`; veateated tulevad aadressi parameetriga `?error=`.
 
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
