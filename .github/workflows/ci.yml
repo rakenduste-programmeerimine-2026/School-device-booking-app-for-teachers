@@ -34,3 +34,35 @@ jobs:
       - run: supabase test db
       # Two real sessions at once; pgTAP runs in a single connection and cannot show this.
       - run: bash supabase/tests/concurrency.sh
+
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.0.0
+      # The flow needs Auth and Realtime too, so this starts the full local stack.
+      - run: supabase start
+        working-directory: .
+      - name: Pass the local Supabase URL and keys to the app and the test
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+          } >> "$GITHUB_ENV"
+        working-directory: .
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
