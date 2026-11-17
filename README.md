@@ -69,7 +69,7 @@
 - `update_bookings`: tühi väärtus jätab vana alles. Uus algus- ja lõpuaeg on Tallinna kellaaeg iga broneeringu enda kuupäeval, nii et terve sarja teise tundi tõstmine on õige ka suve- ja talveaja vahetusel. Mahtu kontrollitakse uuesti; kui mõni kuupäev ei mahu, tagastatakse `insufficient_capacity` (detailis `[{"booking_id", "free_quantity"}]`) ja midagi ei muudeta.
 - Kui sarjast ei jää ühtegi broneeringut, kustutatakse ka sari. Ajalugu säilib.
 - Vead: `not_authenticated`, `access_revoked`, `booking_not_found`, `not_allowed`, `booking_in_past`, `invalid_scope`, `invalid_selection`, `no_bookings`, `nothing_to_change`, `invalid_quantity`, `invalid_range`, `insufficient_capacity`.
-- Serveritoimingud `updateBookings` ja `deleteBookings` (`frontend/app/broneeringud/actions.ts`) kontrollivad kasutajat `getClaims()`-iga, kutsuvad ülaltoodud funktsioone ja tõlgivad vead eestikeelseks teateks. Mahu puudumisel tagastab `updateBookings` konfliktide loetelu (`conflicts`) ja midagi ei muudeta. Kasutajaliidest veel pole.
+- Serveritoimingud `updateBookings` ja `deleteBookings` (`frontend/app/broneeringud/actions.ts`) kontrollivad kasutajat `getClaims()`-iga, kutsuvad ülaltoodud funktsioone ja tõlgivad vead eestikeelseks teateks. Mahu puudumisel tagastab `updateBookings` konfliktide loetelu (`conflicts`) ja midagi ei muudeta. Kasutajaliides on lehel `/broneeringud/minu` (vt "Minu broneeringud").
 
 ### Ühe broneeringu tegemine (leht `/broneeringud/uus`)
 - Õpetaja valib seadme, koguse (ühe tükina seadme puhul, nt 3D-printer, välja ei näidata), kuupäeva ning kas koolitunni või vabad algus- ja lõppajad. Koolitunni valikul salvestatakse tunni algus- ja lõpuaeg.
@@ -125,6 +125,15 @@
 - Iga päev on nähtav ka siis, kui broneeringuid pole. Õppetöövabad päevad on eraldi värviga märgitud: koolivaheaeg (kollane), riigipüha (punane), õppetöövaba päev (sinine), koos perioodi nimega.
 - Vaade on ainult lugemiseks: muutmise ja kustutamise nuppe pole ning kliendid ei saa tabelisse `bookings` otse kirjutada.
 - Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
+
+### Minu broneeringud (leht `/broneeringud/minu`)
+- Avalehelt link "Minu broneeringud". Õpetaja näeb oma broneeringuid sarjade kaupa (üksikbroneering on ühe kuupäevaga sari). Iga sarja kokkuvõttes on seade, esimene ja viimane kuupäev ning tulevaste ja kõigi broneeringute arv; sarja avamisel on näha kõik kuupäevad.
+- Admin näeb kõigi õpetajate sarju koos broneerija nimega ja saab neid muuta.
+- Tuleva broneeringu juures "Muuda" avab paneeli, kus valitakse ulatus: ainult see broneering, see ja kõik järgmised, terve sari (ainult tulevased) või valitud kuupäevad (kui linnukesega on midagi valitud). Nupp "Muuda või kustuta valitud" avab sama paneeli valitud kuupäevadega.
+- Muutmisel saab anda uue koguse (ühe tükina seadme puhul koguse välja pole) ja/või uue aja (koolitund või vaba algus- ja lõpuaeg). Tühi väli jätab vana väärtuse. Kui mõnel kuupäeval pole piisavalt vabu seadmeid, ei muudeta midagi ja nende kuupäevade juures näidatakse vaba kogust.
+- Kustutamine küsib enne kinnitust koos kustutatavate broneeringute arvuga.
+- Möödunud broneeringud on hallid ja neid ei saa valida. Ainult admin näeb nende juures nuppu "Paranda", mis muudab või kustutab ainult selle ühe broneeringu; muudatus jääb ajalukku. Õpetajale seda valikut ei kuvata.
+- Leht uueneb ise, kui broneeringud muutuvad (Realtime), ja andmed loetakse iga päringu ajal uuesti. Broneeringud loetakse 1000 kaupa, nii et suur nimekiri ei lõigu ära.
 
 ### Haldus (leht `/haldus`)
 - Avalehel on adminile link "Haldus". Tavaõpetaja suunatakse avalehele ja tema päringud tabelitele lükkab tagasi RLS.
