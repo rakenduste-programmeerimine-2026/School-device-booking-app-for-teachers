@@ -139,7 +139,10 @@
 - Avalehel on adminile link "Haldus". Tavaõpetaja suunatakse avalehele ja tema päringud tabelitele lükkab tagasi RLS.
 - Seadmed: admin lisab seadme (nimi, kogus), muudab nime ja kogust ning arhiveerib või taastab seadme. Lehelt seadet ei kustutata, vanad broneeringud säilivad.
 - Lubatud e-postid: admin lisab e-posti koos rolliga ja eemaldab selle. Eemaldatud kasutaja blokeeritakse (vt "Ligipääs ja lubatud e-postid"). Viimase admini eemaldamine annab veateate.
-- Õppeaasta ja koolitunnid: serveritoimingud lisavad, muudavad ja kustutavad õppeaastaid (`addSchoolYear`, `updateSchoolYear`, `deleteSchoolYear`), õppetöövabu perioode (`addNonTeachingPeriod`, `updateNonTeachingPeriod`, `deleteNonTeachingPeriod`; liik `break`, `public_holiday` või `day_off`) ja koolitunde (`addLessonPeriod`, `updateLessonPeriod`, `deleteLessonPeriod`). Õppeaasta kustutamine kustutab ka selle perioodid. Nende vormid lisab eraldi issue; siin on ainult toimingud.
+- Õppeaasta ja õppetöövabad ajad: admin muudab õppeaasta algus- ja lõppkuupäeva ning lisab uue õppeaasta. Iga õppeaasta all saab lisada, muuta ja kustutada koolivaheaegu, riigipühi ja õppetöövabu päevi (liik, nimi, algus- ja lõppkuupäev, mõlemad kaasa arvatud). Kattuva õppeaasta või vale kuupäevade järjekorra korral näidatakse veateadet.
+- Õppeaastat lehelt ei kustutata, sest see kustutaks ka kõik selle perioodid. Toiming `deleteSchoolYear` on olemas, aga lehel nuppu pole.
+- Koolitunnid: admin muudab tunni numbrit, algus- ja lõpuaega, lisab ja kustutab tunde. Muudatus mõjutab ainult seda, mis kellaajad tunni valimisel täituvad; olemasolevad broneeringud ei muutu.
+- Serveritoimingud: `addSchoolYear`, `updateSchoolYear`, `addNonTeachingPeriod`, `updateNonTeachingPeriod`, `deleteNonTeachingPeriod` (liik `break`, `public_holiday` või `day_off`), `addLessonPeriod`, `updateLessonPeriod`, `deleteLessonPeriod`.
 - Serveritoimingud on failis `frontend/app/haldus/actions.ts`; veateated tulevad aadressi parameetriga `?error=`.
 
 ## Testid
