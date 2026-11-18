@@ -47,6 +47,7 @@ const firstValue = (value: string | string[] | undefined) =>
 // from cache. Do not add "use cache" here.
 async function Picker({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   const params = await searchParams;
+  await connection();
   const date = /^\d{4}-\d{2}-\d{2}$/.test(firstValue(params.date)) ? firstValue(params.date) : "";
   const start = /^\d{2}:\d{2}$/.test(firstValue(params.start)) ? firstValue(params.start) : "";
   const end = /^\d{2}:\d{2}$/.test(firstValue(params.end)) ? firstValue(params.end) : "";
