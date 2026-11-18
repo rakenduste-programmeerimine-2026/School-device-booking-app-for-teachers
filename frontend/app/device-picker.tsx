@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createBooking, type BookingState } from "./broneeringud/actions";
 
 export type Lesson = { lesson_number: number; starts_time: string; ends_time: string };
 export type DeviceAvailability = {
@@ -24,6 +25,7 @@ const hhmm = (time: string) => time.slice(0, 5);
 
 export function DevicePicker({ date, start, end, lessons, devices }: Props) {
   const router = useRouter();
+  const [state, action, pending] = useActionState<BookingState, FormData>(createBooking, {});
   const [range, setRange] = useState({ date, start, end });
   const [deviceId, setDeviceId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -44,10 +46,11 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
   const rangeIsValid = range.date && range.start && range.end && range.start < range.end;
 
   return (
-    <form className="flex max-w-md flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+    <form action={action} className="flex max-w-md flex-col gap-4">
       <label className="flex flex-col gap-1">
         Kuupäev
         <input
+          name="date"
           type="date"
           required
           value={range.date}
@@ -81,6 +84,7 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
         <label className="flex flex-1 flex-col gap-1">
           Algus
           <input
+            name="startTime"
             type="time"
             required
             value={range.start}
@@ -91,6 +95,7 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
         <label className="flex flex-1 flex-col gap-1">
           Lõpp
           <input
+            name="endTime"
             type="time"
             required
             value={range.end}
@@ -111,6 +116,7 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
           <label className="flex flex-col gap-1">
             Seade
             <select
+              name="deviceTypeId"
               required
               value={deviceId}
               onChange={(e) => setDeviceId(e.target.value)}
@@ -131,6 +137,7 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
             <label className="flex flex-col gap-1">
               Kogus
               <input
+                name="quantity"
                 type="number"
                 required
                 min={1}
@@ -149,6 +156,12 @@ export function DevicePicker({ date, start, end, lessons, devices }: Props) {
                 : `Sel ajal on vaba ainult ${device.free_quantity}.`}
             </p>
           )}
+
+          {state.error && <p role="alert" className="text-red-600">{state.error}</p>}
+          {state.success && <p role="status" className="text-green-700">Broneering tehtud.</p>}
+          <button disabled={pending || !device} className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black">
+            Broneeri
+          </button>
         </>
       )}
     </form>

@@ -1,8 +1,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DevicePicker } from "./device-picker";
 import { RefreshOnBookingChange } from "./refresh-on-booking-change";
+
+async function signOut() {
+  "use server";
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
 
 async function CurrentUser() {
   const supabase = await createClient();
@@ -22,6 +30,9 @@ async function CurrentUser() {
           Haldus
         </Link>
       )}
+      <form action={signOut}>
+        <button className="underline">Logi välja</button>
+      </form>
     </div>
   );
 }

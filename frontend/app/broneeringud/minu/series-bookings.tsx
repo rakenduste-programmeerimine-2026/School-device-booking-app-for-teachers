@@ -56,6 +56,7 @@ export function SeriesBookings({ series, lessons, isAdmin }: { series: Series; l
 
   const single = series.totalQuantity === 1;
   const upcoming = series.bookings.filter((b) => !b.isPast);
+  const allSelected = upcoming.length > 0 && selected.length === upcoming.length;
   const first = series.bookings[0];
   const last = series.bookings[series.bookings.length - 1];
 
@@ -163,7 +164,16 @@ export function SeriesBookings({ series, lessons, isAdmin }: { series: Series; l
         <table className="text-left">
           <thead>
             <tr>
-              <th className="pr-2"><span className="sr-only">Vali</span></th>
+              <th className="pr-2">
+                {upcoming.length > 0 && (
+                  <input
+                    type="checkbox"
+                    aria-label="Vali kõik tulevased"
+                    checked={allSelected}
+                    onChange={(e) => setSelected(e.target.checked ? upcoming.map((b) => b.id) : [])}
+                  />
+                )}
+              </th>
               <th className="pr-4">Kuupäev</th>
               <th className="pr-4">Kellaaeg</th>
               <th className="pr-4">Kogus</th>
