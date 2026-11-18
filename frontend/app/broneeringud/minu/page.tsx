@@ -68,11 +68,11 @@ function groupBySeries(rows: BookingRow[]): Series[] {
 // Reading cookies makes this render per request, so bookings are never served from cache.
 // Do not add "use cache" here.
 async function MyBookings() {
+  // getClaims() reads the current time, which Next refuses to prerender; wait for a request first.
+  await connection();
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   const { data: isAdmin } = await supabase.rpc("is_admin");
-  // "Now" must be the request's time, not the build's.
-  await connection();
 
   const [rows, { data: lessons }] = await Promise.all([
     loadBookings(supabase, isAdmin ? null : claims!.claims.sub),

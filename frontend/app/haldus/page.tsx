@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   addAllowedEmail,
@@ -89,6 +90,8 @@ function LessonFields({ lesson }: { lesson?: { lesson_number: number; starts_tim
 // Reading cookies and searchParams makes this render per request, so it is never cached.
 async function Admin({ searchParams }: Pick<PageProps<"/haldus">, "searchParams">) {
   const { error } = await searchParams;
+  // getClaims() reads the current time, which Next refuses to prerender; wait for a request first.
+  await connection();
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
   if (!claims) redirect("/login");

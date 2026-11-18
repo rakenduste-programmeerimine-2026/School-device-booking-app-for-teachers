@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { DevicePicker } from "./device-picker";
 import { RefreshOnBookingChange } from "./refresh-on-booking-change";
@@ -13,6 +14,8 @@ async function signOut() {
 }
 
 async function CurrentUser() {
+  // getClaims() reads the current time, which Next refuses to prerender; wait for a request first.
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const { data: profile } = await supabase
