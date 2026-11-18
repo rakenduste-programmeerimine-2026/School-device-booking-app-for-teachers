@@ -19,6 +19,8 @@ Kõik need tehakse lehel `/haldus` (kontaktisik lisatakse lubatud e-postide nime
 
 ## 2. Sissejuhatus (1 min)
 
+Küsi enne rakenduse avamist ja kirjuta vastus üles: **Mis probleemi lootsid, et rakendus lahendab?** Seda vastust võrreldakse lõpus küsimustega 2 ja 6.
+
 Ütle kontaktisikule: "Me testime rakendust, mitte sind. Mõtle valjusti. Kui miski on segane, ütle seda." Ära näita ette, kuidas rakendus töötab.
 
 ## 3. Ülesanded
@@ -51,11 +53,16 @@ Kuupäev: ____________  Kontaktisik: ____________  Vaatleja: ____________
 
 Ülesande 2 aeg on kirja pandud: ____ min ____ s. Eesmärk (2 min või vähem) täidetud: jah / ei.
 
-## 5. Lõpuküsimused (2 min)
+## 5. Lõpuküsimused (kuni 5 min)
 
-1. Mis oli kõige segasem hetk?
-2. Kas midagi puudus, mida sa ootasid?
-3. Kas kasutaksid seda Stuudiumi asemel? Miks või miks mitte?
+Kirjuta vastused üles sõna-sõnalt.
+
+1. Kas said kokkulepitud ülesande tehtud? Kus vajasid abi?
+2. Kas rakendus lahendab probleemi täielikult, osaliselt või veel mitte? Miks?
+3. Kas kasutaksid seda päriselt? Miks või miks mitte?
+4. Mis oli kõige kasulikum, segasem või puudu?
+5. Kas seda tasub edasi arendada? Mida tuleks kõigepealt muuta?
+6. Kui hästi vastas tulemus sellele, mida alguses kokku leppisime?
 
 ## 6. Pärast testi
 
