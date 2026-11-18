@@ -152,6 +152,18 @@
 - Tavaõpetaja suunatakse avalehele ja RLS ei lase tal ajalugu lugeda.
 - Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
 
+## Vercel preview
+Kohalik arendus kasutab edasi `supabase start`. Vercel'i preview vajab internetist kättesaadavat Supabase'i, selleks on **eraldi hostitud Supabase'i projekt, mis on ainult preview jaoks**.
+
+Seadistab inimene (saladusi ei commit'ita):
+1. Loo Supabase'i projekt oma isikliku Supabase'i kontoga. Ära kasuta Supabase'i GitHub-integratsiooni ega Vercel-Supabase turuplatsi integratsiooni, need puudutavad organisatsiooni ja teisi repo'sid.
+2. Pane migratsioonid projekti (hoolikalt, see on mitte-kohalik andmebaas): `supabase link --project-ref <ref>` ja `supabase db push`. Lisa `allowed_emails` tabelisse vähemalt üks admini e-post.
+3. Supabase'i Authentication > Providers > Google: sisesta Google'i kliendi ID ja saladus. Authentication > URL Configuration: lisa Vercel'i preview aadress ja `<aadress>/auth/callback` lubatud ümbersuunamistesse. Google'i OAuth kliendile lisa Supabase'i callback `https://<ref>.supabase.co/auth/v1/callback`.
+4. Vercel (omanik w1ttyrat): impordi repo. Juurkaust on `frontend`. Kui Hobby plaan ei luba organisatsiooni repot importida, vaja on Vercel'i tiimi või forki.
+5. Vercel'i keskkonnamuutujad (Preview): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ja `NEXT_PUBLIC_SITE_URL`. Viimane on rakenduse avalik aadress ilma lõpu kaldkriipsuta ja see sisse ehitatakse build'i ajal, seega kasuta püsivat aadressi (näiteks haru domeen), mitte iga deploy'i unikaalset linki.
+
+Kontroll pärast deploy'd: logi Google'iga sisse, tee üksik- ja sarjabroneering, muuda ja kustuta broneeringuid, ava `/haldus` ja `/broneeringud`.
+
 ## Testid
 Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `supabase test db`: pgTAP testid kaustas `supabase/tests` (mahutavus, poolavatud vahemikud, õigused ja RLS, ajalugu, ligipääsu äravõtmine).
