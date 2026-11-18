@@ -170,6 +170,5 @@ Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet, kord üksikbroneeringuga ja kord sarja kinnitamisega. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi, koguarvu ei ületata kunagi ja tagasi lükatud sarjast ei kirjutata ühtegi kuupäeva. Skript kirjutab ajutised read ja kustutab need ise.
 - CI käivitab mõlemad igal PR-il.
 - `npm test` kaustas `frontend`: Vitest testid (Tallinna aja teisendus ja sarja kuupäevad, sh suve-/talveajale üleminek ning õppetöövabade päevade vahelejätmine).
-
-## Piloot
-Kontaktisikuga testimise stsenaarium, tulemuste tabel ja ettevalmistuse kontrollnimekiri on failis [docs/pilot-script.md](docs/pilot-script.md).
+- `npm run test:e2e` kaustas `frontend`: Playwright läbiv test (`frontend/e2e/booking-flow.e2e.ts`). Õpetaja broneerib terve aasta sarja, lahendab konflikti (teine õpetaja hoiab sama aja seadmed) ja kustutab hulgi kolm tulevast kuupäeva. Vajab töötavat `supabase start` ja keskkonnamuutujaid `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (kohalikus `frontend/.env.local` failis) ja `SUPABASE_SERVICE_ROLE_KEY` (`supabase status -o env`, väärtust ei commit'ita). Test ehitab ja käivitab rakenduse ise, logib sisse parooliga (rakenduse enda sisselogimine on ainult Google) ja loob ning kustutab oma testkasutajad ning seadme "E2E seade". Vajab kehtivat õppeaastat andmebaasis.
+- CI käivitab selle eraldi töös `e2e`.
