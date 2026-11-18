@@ -170,3 +170,6 @@ Käivita repo juurkaustast, kui kohalik Supabase töötab (`supabase start`):
 - `bash supabase/tests/concurrency.sh`: kaks samaaegset andmebaasiühendust broneerivad sama seadet, kord üksikbroneeringuga ja kord sarja kinnitamisega. Test kinnitab, et teine päring ootab esimese lukku ja lükatakse tagasi, koguarvu ei ületata kunagi ja tagasi lükatud sarjast ei kirjutata ühtegi kuupäeva. Skript kirjutab ajutised read ja kustutab need ise.
 - CI käivitab mõlemad igal PR-il.
 - `npm test` kaustas `frontend`: Vitest testid (Tallinna aja teisendus ja sarja kuupäevad, sh suve-/talveajale üleminek ning õppetöövabade päevade vahelejätmine).
+
+## Piloot
+Kontaktisikuga testimise stsenaarium, tulemuste tabel ja ettevalmistuse kontrollnimekiri on failis [docs/pilot-script.md](docs/pilot-script.md).
