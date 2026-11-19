@@ -1,10 +1,21 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { DevicePicker } from "./device-picker";
 import { RefreshOnBookingChange } from "./refresh-on-booking-change";
 
+async function signOut() {
+  "use server";
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
+}
+
 async function CurrentUser() {
+  // getClaims() reads the current time, which Next refuses to prerender; wait for a request first.
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const { data: profile } = await supabase
@@ -22,6 +33,9 @@ async function CurrentUser() {
           Haldus
         </Link>
       )}
+      <form action={signOut}>
+        <button className="underline">Logi välja</button>
+      </form>
     </div>
   );
 }
@@ -33,6 +47,7 @@ const firstValue = (value: string | string[] | undefined) =>
 // from cache. Do not add "use cache" here.
 async function Picker({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   const params = await searchParams;
+  await connection();
   const date = /^\d{4}-\d{2}-\d{2}$/.test(firstValue(params.date)) ? firstValue(params.date) : "";
   const start = /^\d{2}:\d{2}$/.test(firstValue(params.start)) ? firstValue(params.start) : "";
   const end = /^\d{2}:\d{2}$/.test(firstValue(params.end)) ? firstValue(params.end) : "";

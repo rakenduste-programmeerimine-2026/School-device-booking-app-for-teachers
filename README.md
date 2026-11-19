@@ -100,8 +100,10 @@
 - Õpetaja valib kuupäeva ja koolitunni (algus- ja lõpuaeg täituvad ise) või sisestab algus- ja lõpuaja vabalt.
 - Seadmete valikus on iga seadme juures vaba ja kogu kogus valitud ajal, näiteks "Sülearvuti – 12 / 30 vaba". Arhiveeritud seadmeid valikus ei ole.
 - Üksikobjekti (koguarv 1, näiteks 3D-printer) puhul koguse välja ei näidata.
-- Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Broneeringu salvestamine tuleb issue'ga #11.
+- Kui soovitud kogus on suurem kui vaba kogus, näidatakse hoiatust. Nupp "Broneeri" (nähtav, kui kuupäev, aeg ja seade on valitud) salvestab broneeringu ja näitab vea või teate "Broneering tehtud.".
 - Saadavus arvutatakse iga päringu ajal uuesti ega tule vahemälust.
+- Avalehel on nupp "Logi välja": see logib kasutaja välja ja viib sisselogimislehele.
+- Tumedas teemas on kuupäeva- ja kellaajavälja ikoonid heledad (`color-scheme: dark`).
 - Vaba kogus uueneb ise: leht tellib Supabase Realtime'i kaudu tabeli `bookings` muudatused (Postgres Changes) ja iga sündmuse peale arvutab server saadavuse uuesti. Kui keegi teine broneerib samal ajal, muutub "X / Y vaba" ilma lehte värskendamata. Sündmuse sisu ei kasutata, numbrid tulevad alati serverist.
 - Selleks on tabel `bookings` lisatud publikatsiooni `supabase_realtime`. Realtime saadab sündmusi ainult sisseloginud kasutajatele, kellel on õigus broneeringuid lugeda.
 
@@ -127,7 +129,7 @@
 - Andmed loetakse iga päringu ajal uuesti ega tule vahemälust.
 
 ### Minu broneeringud (leht `/broneeringud/minu`)
-- Avalehelt link "Minu broneeringud". Õpetaja näeb oma broneeringuid sarjade kaupa (üksikbroneering on ühe kuupäevaga sari). Iga sarja kokkuvõttes on seade, esimene ja viimane kuupäev ning tulevaste ja kõigi broneeringute arv; sarja avamisel on näha kõik kuupäevad.
+- Avalehelt link "Minu broneeringud". Õpetaja näeb oma broneeringuid sarjade kaupa (üksikbroneering on ühe kuupäevaga sari). Iga sarja kokkuvõttes on seade, esimene ja viimane kuupäev ning tulevaste ja kõigi broneeringute arv; sarja avamisel on näha kõik kuupäevad. Tabeli päises olev märkeruut "Vali kõik tulevased" valib kõik sarja tulevased kuupäevad korraga ja tühistab valiku.
 - Admin näeb kõigi õpetajate sarju koos broneerija nimega ja saab neid muuta.
 - Tuleva broneeringu juures "Muuda" avab paneeli, kus valitakse ulatus: ainult see broneering, see ja kõik järgmised, terve sari (ainult tulevased) või valitud kuupäevad (kui linnukesega on midagi valitud). Nupp "Muuda või kustuta valitud" avab sama paneeli valitud kuupäevadega.
 - Muutmisel saab anda uue koguse (ühe tükina seadme puhul koguse välja pole) ja/või uue aja (koolitund või vaba algus- ja lõpuaeg). Tühi väli jätab vana väärtuse. Kui mõnel kuupäeval pole piisavalt vabu seadmeid, ei muudeta midagi ja nende kuupäevade juures näidatakse vaba kogust.

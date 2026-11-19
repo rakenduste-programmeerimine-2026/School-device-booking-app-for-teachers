@@ -132,7 +132,8 @@ test("teacher books a full-year series, resolves a conflict and bulk-deletes fut
   await page.getByText(deviceName).click();
   const rows = page.getByRole("row");
   await expect(rows).toHaveCount(total + 1); // +1 for the header
-  for (const row of [0, 1, 2]) await page.getByRole("checkbox").nth(row).check();
+  // Checkbox 0 is the select-all box in the table header.
+  for (const row of [0, 1, 2]) await page.getByRole("checkbox").nth(row + 1).check();
   await page.getByRole("button", { name: /Muuda või kustuta valitud \(3\)/ }).click();
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Kustuta", exact: true }).click();
